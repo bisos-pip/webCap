@@ -22,7 +22,7 @@ from bisos.debian import systemd_seed as systemd_seed  # noqa
 def sysdUnitFileFunc() -> str | None:
     """Produce the unit file as a string. execPath can be different for testing vs stationable."""
 
-    if ( execPath := pathPlus.whichBinPath(" gunicorn",)
+    if ( execPath := pathPlus.whichBinPath("gunicorn",)
     ) is None: return None
 
     templateStr = f"""
@@ -36,10 +36,13 @@ User=bisos
 Group=www-data
 WorkingDirectory=/bisos/git/bxRepos/cliGui/webCliGui/server
 ExecStart={execPath} \
-          --access-logfile - \
-          --workers 3 \
-          --bind unix:/run/gunicorn.sock \
-          webCliGui.wsgi:application
+    --name guninv \
+    --log-level=debug \
+    --log-file=- \
+    --access-logfile - \
+    --workers 3 \
+    --bind unix:/run/gunicorn.sock \
+    webCliGui.wsgi:application
 
 [Install]
 WantedBy=multi-user.target

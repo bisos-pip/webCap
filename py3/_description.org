@@ -1,0 +1,144 @@
+#+title: bisos.webCap:  BISOS Web Capabilities
+
+
+
+
+* Overview
+
+/bisos.webCap/ provides general facilities for creation of Web Capabilities.
+
+bisos.webCap is a python package that uses the  [[https://github.com/bisos-pip/pycs][PyCS-Framework]].
+
+
+
+* Table of Contents     :TOC:
+- [[#overview][Overview]]
+- [[#scope-of-bisos-web-capabilities-foundations][Scope of BISOS Web Capabilities Foundations]]
+  - [[#nginx][NGINX]]
+  - [[#python-back-end][Python Back-End]]
+  - [[#react-front-end][React Front End]]
+- [[#bisos-web-apps][BISOS Web Apps]]
+  - [[#csplayer][csPlayer]]
+  - [[#byname-sites][ByName Sites]]
+  - [[#byname-factory][ByName Factory]]
+- [[#relevant-resources][Relevant Resources]]
+- [[#installation][Installation]]
+  - [[#installation-with-pip][Installation With pip]]
+  - [[#installation-with-pipx][Installation With pipx]]
+  - [[#post-installation-basic-testing][Post Installation Basic Testing]]
+- [[#usage][Usage]]
+  - [[#local-usage-system-command-line][Local Usage (system command-line)]]
+- [[#documentation-and-blee-panels][Documentation and Blee-Panels]]
+  - [[#bisoswebcap-blee-panels][bisos.webCap Blee-Panels]]
+- [[#support][Support]]
+- [[#planned-improvements][Planned Improvements]]
+
+* Scope of BISOS Web Capabilities Foundations
+
+** NGINX
+
+| nginx           | BISOS Module Name | Comment |
+| virtual domains |                   |         |
+
+** Python Back-End
+
+| django   | djangoAdmin.cs | Comment   |
+| postgres |                |           |
+| Gunicorn |                | Not uwsgi |
+| systemd  |                |           |
+
+** React Front End
+
+| react                                             | BISOS Resources | Comment |
+| gatsby                                            |                 |         |
+| reveal.js                                         |                 |         |
+| https://github.com/bouzidanas/react-reveal-slides |                 |         |
+
+* BISOS Web Apps
+
+** csPlayer
+
+** ByName Sites
+
+** ByName Factory
+
+* Relevant Resources
+
+- https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-debian-11
+- https://tutos.readthedocs.io/en/latest/source/ndg.html
+
+* Installation
+
+The sources for the bisos.webCap pip package are maintained at:
+https://github.com/bisos-pip/webCap.
+
+The bisos.webCap pip package is available at PYPI as
+https://pypi.org/project/bisos.webCap
+
+You can install bisos.webCap with pip or pipx.
+
+** Installation With pip
+
+If you need access to bisos.webCap as a python module, you can install it with pip:
+
+#+begin_src bash
+pip install bisos.webCap
+#+end_src
+
+** Installation With pipx
+
+If you only need access to bisos.webCap on command-line, you can install it with pipx:
+
+#+begin_src bash
+pipx install bisos.webCap
+#+end_src
+
+** Post Installation Basic Testing
+
+After the installation, run some basic tests:
+
+#+begin_src bash
+webCap.cs
+webCap networking.interfaces.lo.bindings
+#+end_src
+
+
+* Usage
+
+** Local Usage (system command-line)
+
+=webCap.cs= does the equivalent of webCap.
+
+#+begin_src bash
+bin/webCap.cs
+#+end_src
+
+
+* Documentation and Blee-Panels
+
+bisos.webCap is part of ByStar Digital Ecosystem [[http://www.by-star.net]].
+
+This module's primary documentation is in the form of Blee-Panels.
+Additional information is also available in: [[http://www.by-star.net/PLPC/180047]]
+
+** bisos.webCap Blee-Panels
+
+bisos.webCap Blee-Panles are in ./panels directory.
+From within Blee and BISOS these panles are accessible under the
+Blee "Panels" menu.
+
+See [[file:./panels/_nodeBase_/fullUsagePanel-en.org]] for a starting point.
+
+* Support
+
+For support, criticism, comments and questions; please contact the
+author/maintainer\\
+[[http://mohsen.1.banan.byname.net][Mohsen Banan]] at:
+[[http://mohsen.1.banan.byname.net/contact]]
+
+
+* Planned Improvements
+
+- Enumerate applicabilities: telecom/SON, datacenter, CMIP-MOs
+- py3/bisos/webCap/tocsModule_csu.py
+

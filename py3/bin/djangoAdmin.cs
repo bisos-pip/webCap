@@ -165,7 +165,7 @@ class examples(cs.Cmnd):
 
         # od = collections.OrderedDict
         cmnd = cs.examples.cmndEnter
-        # literal = cs.examples.execInsert
+        literal = cs.examples.execInsert
 
         cs.examples.menuChapter('=Activation Commands=')
         cmnd('reposEnsure', comment=" # Clone or Pull as appropriate")
@@ -173,7 +173,21 @@ class examples(cs.Cmnd):
         cmnd('reactBasesPrep', comment=" # Prep Django before start")
 
         cs.examples.menuChapter('=Full Update=')
-        cmnd('fullUpdate', comment=" # Create Performer SAP / Activate BPOs")
+        cmnd('fullUpdate', comment=" # Do all of the above")
+
+        cs.examples.menuChapter('=MONITOR Django and related services=')
+        literal("gunicorn-socket-sysd.pcs")
+        literal("gunicorn-socket-sysd.pcs -i sysdSysUnit  status # systemd-seed implementation for sockets is incomplete")
+        literal("ls -l /run/gunicorn.sock # MUST EXIST, things wont work without it")
+        literal("gunicorn-csPlayerPerf-sysd.pcs")
+        literal("gunicorn-csPlayerPerf-sysd.pcs -i sysdSysUnit  status # LOGS are redirected to journal")
+        literal("journalctl -u gunicorn -n 200  # Traffic in and out of django")
+        literal("nginx-sysd.pcs")
+        literal("nginx-sysd.pcs -i sysdSysUnit  status")
+
+
+        cs.examples.menuChapter('=RESTART Django and related services=')
+        literal("")
 
         return(cmndOutcome)
 

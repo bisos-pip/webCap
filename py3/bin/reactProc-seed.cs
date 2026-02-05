@@ -109,12 +109,12 @@ if b.cs.G.plantOfThisSeed is not None:
 #+BEGIN_SRC emacs-lisp
 (setq  b:py:cs:csuList
   (list
-   "bisos.webCap.djangoProc_csu"
+   "bisos.webCap.reactProc_csu"
    "plantedCsu"
  ))
 #+END_SRC
 #+RESULTS:
-| bisos.webCap.djangoProc_csu | plantedCsu |
+| bisos.webCap.reactProc_csu | plantedCsu |
 #+end_org """
 
 ####+BEGIN: b:py3:cs:framework/csuListProc :pyImports t :csuImports t :csuParams t :csmuParams nil
@@ -122,9 +122,9 @@ if b.cs.G.plantOfThisSeed is not None:
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Process CSU List~ with /2/ in csuList pyImports=t csuImports=t csuParams=t
 #+end_org """
 
-from bisos.webCap import djangoProc_csu
+from bisos.webCap import reactProc_csu
 
-csuList = [ 'bisos.webCap.djangoProc_csu', 'plantedCsu', ]
+csuList = [ 'bisos.webCap.reactProc_csu', 'plantedCsu', ]
 
 if b.cs.G.plantOfThisSeed is None:
     csuList.remove('plantedCsu')
@@ -188,11 +188,11 @@ class examples(cs.Cmnd):
         cs.examples.commonBrief()
 
         if b.cs.G.plantOfThisSeed is None:
-            djangoProc_csu.examples_csu().pyCmnd(
+            reactProc_csu.examples_csu().pyCmnd(
                 # pyKwArgs={'uploadPath': uploadPathAbs}
             )
         else:
-            djangoProc_csu.examples_seed().pyCmnd(
+            reactProc_csu.examples_seed().pyCmnd(
                  # pyKwArgs={'uploadPath': uploadPathAbs}
             )
 
