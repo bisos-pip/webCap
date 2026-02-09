@@ -95,11 +95,10 @@ import collections
 ####+END:
 
 import pathlib
+# import enum
 
-from bisos.uploadAsCs import uploadAsCs_csu
-from bisos.uploadAsCs import abstractLoader
+from bisos.webCap import djangoProc_seedInfo
 
-from bisos.b import cmndsSeed
 import logging
 log = logging.getLogger(__name__)
 
@@ -198,9 +197,9 @@ facterModule.cs -i examples
         literal("nginx-sysd.pcs")
         literal("nginx-sysd.pcs -i sysdSysUnit  status")
 
-
         cs.examples.menuChapter('=RESTART Django and related services=')
-        literal("")
+        literal("python manage.py migrate")
+        literal("python manage.py collectstatic # Needed for admin page etc")
 
         return(cmndOutcome)
 
@@ -242,9 +241,24 @@ facterModule.cs -i examples
 
         #+end_org """)
 
+        literal = cs.examples.execInsert
+
         examples_csu().pyCmnd()
 
+        cs.examples.menuChapter('=Planted CS Info=')
+
+        cwd = pathlib.Path.cwd()
+
+        print(f"{cwd}")
+
+        literal(f"python manage.py runserver 5000")
+
+        print(f"http://{djangoProc_seedInfo.djangoProcSeedInfo.webVirtualDomain}")
+        print(f"http://localhost:{djangoProc_seedInfo.djangoProcSeedInfo.dev_webPortNu}/admin")
+        print(f"http://localhost:5000/admin")
+
         return(cmndOutcome)
+
 
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "placeHolder" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 9999 :pyInv ""

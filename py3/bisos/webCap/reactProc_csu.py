@@ -95,11 +95,10 @@ import collections
 ####+END:
 
 import pathlib
+import enum
 
-from bisos.uploadAsCs import uploadAsCs_csu
-from bisos.uploadAsCs import abstractLoader
+from bisos.webCap import reactProc_seedInfo
 
-from bisos.b import cmndsSeed
 import logging
 log = logging.getLogger(__name__)
 
@@ -184,23 +183,52 @@ facterModule.cs -i examples
 
         pars_cluster_default = od([('cluster', "default"),])
 
-        # cmnd('targetRun', csName=csName, pars=(pars_debug_full |pars_upload), comment=f"""# DEBUG Small Batch""",)
-        # cs.examples.menuChapter('=CSMU:: Facter Module  Commands=')
-        # cmnd('clusterRun',)
+        cs.examples.menuChapter('=Determine Which React Framework is Being Used=')
+        cmnd('whichReactFramework', comment=f"""# DEBUG Small Batch""",)
 
-        cs.examples.menuChapter('=MONITOR Django and related services=')
-        literal("gunicorn-socket-sysd.pcs")
-        literal("gunicorn-socket-sysd.pcs -i sysdSysUnit  status # systemd-seed implementation for sockets is incomplete")
-        literal("ls -l /run/gunicorn.sock # MUST EXIST, things wont work without it")
-        literal("gunicorn-csPlayerPerf-sysd.pcs")
-        literal("gunicorn-csPlayerPerf-sysd.pcs -i sysdSysUnit  status # LOGS are redirected to journal")
-        literal("journalctl -u gunicorn -n 200  # Traffic in and out of django")
+        cs.examples.menuChapter('=MONITOR Nginx and related services=')
         literal("nginx-sysd.pcs")
         literal("nginx-sysd.pcs -i sysdSysUnit  status")
+        literal("journalctl -u nginx 200  # Traffic in and out of nginx")
 
+        cs.examples.menuChapter('=RESTART Nginx and related services=')
+        literal("nginx-sysd.pcs -i sysdSysUnit  restart")
 
-        cs.examples.menuChapter('=RESTART Django and related services=')
-        literal("")
+        cs.examples.menuChapter('=React/Gatsby NPM Development=')
+
+        reactFramework = whichReactFramework_()
+        if reactFramework == ReactFramework.React:
+            literal("npm run watch")
+        elif reactFramework == ReactFramework.Gatsby:
+            literal("gatsby develop")
+        elif  reactFramework== ReactFramework.NoneFound:
+            log.info("No React framework detected; skipping Nginx restart.")
+
+        cs.examples.menuChapter('=React/Gatsby NPM Production Build=')
+
+        reactFramework = whichReactFramework_()
+        if reactFramework == ReactFramework.React:
+            literal("npm run build")
+            literal("npm run build && nginx-sysd.pcs -i sysdSysUnit  restart") 
+            literal("npm run clean && npm run build && nginx-sysd.pcs -i sysdSysUnit  restart")                                   
+        elif reactFramework == ReactFramework.Gatsby:
+            literal("gatsby build")
+            literal("gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart")
+            literal("gatsby clean && gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart")
+        elif  reactFramework== ReactFramework.NoneFound:
+            log.info("No React framework detected; skipping Nginx restart.")
+
+        cs.examples.menuChapter('=React/Gatsby NPM Clean=')
+
+        reactFramework = whichReactFramework_()
+        if reactFramework == ReactFramework.React:
+            literal("npm run clean")
+            literal("npm run clean && nginx-sysd.pcs -i sysdSysUnit  restart")
+        elif reactFramework == ReactFramework.Gatsby:
+            literal("gatsby clean")
+            literal("gatsby clean && nginx-sysd.pcs -i sysdSysUnit  restart")
+        elif  reactFramework== ReactFramework.NoneFound:
+            log.info("No React framework detected; skipping Nginx restart.")
 
         return(cmndOutcome)
 
@@ -244,7 +272,119 @@ facterModule.cs -i examples
 
         examples_csu().pyCmnd()
 
+        cs.examples.menuChapter('=Planted CS Info=')
+
+        assert reactProc_seedInfo.reactProcSeedInfo.reactFramework == whichReactFramework_()
+
+        cwd = pathlib.Path.cwd()
+
+        print(f"{cwd}")
+        print(f"http://{reactProc_seedInfo.reactProcSeedInfo.webVirtualDomain}")
+        print(f"http://localhost:{reactProc_seedInfo.reactProcSeedInfo.dev_webPortNu}")
+
         return(cmndOutcome)
+
+####+BEGIN: bx:dblock:python:enum :enumName "ReactFramework" :comment ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Enum       [[elisp:(outline-show-subtree+toggle)][||]] /ReactFramework/  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@enum.unique
+class ReactFramework(enum.Enum):
+####+END:
+        React = "react"
+        Gatsby = "gatsby"
+        NoneFound = "noneFound"
+
+####+BEGIN: b:py3:cs:func/typing :funcName "whichReactFramework_" :funcType "extTyped" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /reactFramework/  deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def whichReactFramework_(
+####+END:
+) -> ReactFramework:
+        """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ] Look in the current directory for files that indicate which React framework is being used.
+        #+end_org """
+        # Check for Gatsby-specific configuration files
+        current_dir = pathlib.Path('.')
+        
+        # Gatsby indicators
+        gatsby_config_files = [
+            'gatsby-config.js',
+            'gatsby-config.ts',
+            'gatsby-config.mjs',
+        ]
+        
+        for gatsby_file in gatsby_config_files:
+            if (current_dir / gatsby_file).exists():
+                return ReactFramework.Gatsby
+        
+        # Check for .gatsby-files marker directory
+        if (current_dir / '.gatsby-files').exists():
+            return ReactFramework.Gatsby
+        
+        # Check for pure React config files (CRA or similar)
+        react_config_files = [
+            'package.json',  # All React projects have this
+            'react-scripts',  # CRA dependency (in node_modules, but check package.json)
+        ]
+        
+        # Check if package.json exists and contains react/react-scripts
+        package_json_path = current_dir / 'package.json'
+        if package_json_path.exists():
+            try:
+                import json
+                with open(package_json_path, 'r') as f:
+                    package_data = json.load(f)
+                    # Check if react or react-scripts is in dependencies
+                    deps = package_data.get('dependencies', {})
+                    devDeps = package_data.get('devDependencies', {})
+                    if 'react' in deps or 'react' in devDeps or 'react-scripts' in devDeps:
+                        return ReactFramework.React
+            except (json.JSONDecodeError, IOError):
+                pass
+        
+        # If neither Gatsby nor React found, return NoneFound
+        return ReactFramework.NoneFound
+
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "whichReactFramework" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<whichReactFramework>>  =verify= argsMax=0 ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class whichReactFramework(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+        cmndArgsSpecDict = self.cmndArgsSpec()
+####+END:
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]
+Detect which React framework is being used in the current directory.
+        #+end_org """)
+
+        result: ReactFramework = whichReactFramework_()
+        
+        #print(f"{result.value}")
+
+        return cmndOutcome.set(
+                opError=b.OpError.Success,
+                opResults=result,
+        )
 
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "placeHolder" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 9999 :pyInv ""
@@ -337,8 +477,6 @@ echo 127.0.0.1 | facterModule.cs --upload=../../bin/facterModuleSample.py  -i cl
         )
 
         return cmndArgsSpecDict
-
-
 
 
 ####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"

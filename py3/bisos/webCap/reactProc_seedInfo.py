@@ -81,27 +81,83 @@ from bisos.common import csParam
 import collections
 # ####+END:
 
-import atexit
+from dataclasses import dataclass, field
 
-from bisos.csSeed import seedsLib
+from bisos.csSeed import cmnds_seedInfo
 
-seedCSMU = 'reactProc-seed.cs'
-
-####+BEGIN: b:py3:cs:func/typing :funcName "atexit_plantWithWhich" :funcType "extTyped" :comment "expects seedGraphviz.cs" :deco "atexit.register"
+####+BEGIN: bx:cs:py3:section :title "Public Classes"
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /atexit_plantWithWhich/  expects seedGraphviz.cs deco=atexit.register  [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  /Section/    [[elisp:(outline-show-subtree+toggle)][||]] *Public Classes*  [[elisp:(org-cycle)][| ]]
 #+end_org """
-@atexit.register
-def atexit_plantWithWhich(
 ####+END:
-        asExpected: str=seedCSMU,
-) -> None:
+
+####+BEGIN: b:py3:class/decl :className "ReactProcSeedInfo" :superClass "object" :classType "basic" :deco "@dataclass" :comment "Abstraction of a  Interface"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Cls-basic  [[elisp:(outline-show-subtree+toggle)][||]] /ReactProcSeedInfo/  superClass=object =Abstraction of a  Interface=  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@dataclass
+class ReactProcSeedInfo(object):
+####+END:
+    """
+** Abstraction of
+"""
+    # Common SeedInfo
+    seedType: str | None = None  # post_init: self.__class__.__name__
+    examplesFuncsList: list[typing.Callable] | None = None
+
+    # Specific SeedInfo
+    reactFramework: str | None = None
+    webVirtualDomain: str | None = None
+    dev_webPortNu: int | None = None
+
+    def __post_init__(self):
+        # default_factory machinery does not have access to self, hence in post_init:
+        if self.seedType is None:
+            self.seedType = self.__class__.__name__
+
+####+BEGIN: b:py3:class/singleton  :comment ""
     """ #+begin_org
-** [[elisp:(org-cycle)][| *DocStr | ] shim over b.importFile.plantWithWhich
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Singleton Class Enforcer [[elisp:(outline-show-subtree+toggle)][||]]   [[elisp:(org-cycle)][| ]]
     #+end_org """
+    _instance = None
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+####+END:
 
-    seedsLib.plantWithWhich(asExpected)
+# Singleton Instantiation
+reactProcSeedInfo = ReactProcSeedInfo()
 
+####+BEGIN: bx:cs:py3:section :title "Public Functions"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  /Section/    [[elisp:(outline-show-subtree+toggle)][||]] *Public Functions*  [[elisp:(org-cycle)][| ]]
+#+end_org """
+####+END:
+
+####+BEGIN: b:py3:cs:func/typing :funcName "setup" :funcType "extTyped" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /setup/  deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def setup(
+####+END:
+        examplesFuncsList: list[typing.Callable] | None =None,
+        reactFramework: str | None = None,
+        webVirtualDomain: str | None = None,
+        dev_webPortNu: int | None = None,
+):
+    """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ]
+    #+end_org """
+    if examplesFuncsList is not None:
+        reactProcSeedInfo.examplesFuncsList  = examplesFuncsList
+        cmnds_seedInfo.setup(
+            examplesFuncsList=examplesFuncsList,
+        )
+    reactProcSeedInfo.reactFramework = reactFramework
+    reactProcSeedInfo.webVirtualDomain = webVirtualDomain
+    reactProcSeedInfo.dev_webPortNu = dev_webPortNu
 
 ####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"
 """ #+begin_org

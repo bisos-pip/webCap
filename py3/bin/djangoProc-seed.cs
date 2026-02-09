@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import typing ; csInfo: typing.Dict[str, typing.Any] = {'category': 'csxu', 'name': 'facterModule.cs', 'features': ['direct', 'uploader', 'seeded']}
+import typing ; csInfo: typing.Dict[str, typing.Any] = {'category': 'csxu', 'name': 'djangoProc-seed.cs', 'features': ['direct', 'uploader', 'seeded']}
 
 csInfo['summary'] = """ #+begin_org
 * ~[Summary]~ :: A =CmndSvc= (Pkged, Direct, Seeded, Uploadable) for uploading and absorbing a facterModule.
@@ -89,19 +89,26 @@ from bisos.common import csParam
 import collections
 ####+END:
 
+####+BEGIN: b:py3:cs:framework/exceptionImports :comment "BISOS Enhanced Excpetions"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] *Imports* =BISOS Enhanced Exceptions=
+#+end_org """
+from bisos.b import enhancedExceptions
+####+END:
+
 import pathlib
 
 import typing
 import sys
 import os
 
-####+BEGIN: b:py3:cs:framework/csmuSeeded :disabled? nil :comment "Import plantedCsu"
+####+BEGIN: b:py3:cs:framework/csxuSeeded :disabled? nil :comment "Import plantedCsu"
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Seeded CSMU~ Import plantedCsu
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Seeded CSXU~ Import plantedCsu
 #+end_org """
-from bisos.b import cmndsSeed
-if b.cs.G.plantOfThisSeed is not None:
-    b.importFileAs('plantedCsu', b.cs.G.plantOfThisSeed, __file__, __name__)
+from bisos.csSeed import seedsLib
+if seedsLib.seededCsxuInfo.plantOfThisSeed is not None:
+    b.importFileAs('plantedCsu', seedsLib.seededCsxuInfo.plantOfThisSeed, __file__, __name__)
 ####+END:
 
 """ #+begin_org
@@ -109,24 +116,26 @@ if b.cs.G.plantOfThisSeed is not None:
 #+BEGIN_SRC emacs-lisp
 (setq  b:py:cs:csuList
   (list
+   "bisos.csPlayer.csxuFps_csu"
    "bisos.webCap.djangoProc_csu"
    "plantedCsu"
  ))
 #+END_SRC
 #+RESULTS:
-| bisos.webCap.djangoProc_csu | plantedCsu |
+| bisos.csPlayer.csxuFps_csu | bisos.webCap.djangoProc_csu | plantedCsu |
 #+end_org """
 
-####+BEGIN: b:py3:cs:framework/csuListProc :pyImports t :csuImports t :csuParams t :csmuParams nil
+####+BEGIN: b:py3:cs:framework/csuListImportPlus :pyImports t :csuImports t :csuParams t :csmuParams nil
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Process CSU List~ with /2/ in csuList pyImports=t csuImports=t csuParams=t
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Process CSU List~ with /3/ in csuList pyImports=t csuImports=t csuParams=t
 #+end_org """
 
+from bisos.csPlayer import csxuFps_csu
 from bisos.webCap import djangoProc_csu
 
-csuList = [ 'bisos.webCap.djangoProc_csu', 'plantedCsu', ]
+csuList = [ 'bisos.csPlayer.csxuFps_csu', 'bisos.webCap.djangoProc_csu', 'plantedCsu', ]
 
-if b.cs.G.plantOfThisSeed is None:
+if seedsLib.seededCsxuInfo.plantOfThisSeed is None:
     csuList.remove('plantedCsu')
 
 g_importedCmndsModules = cs.csuList_importedModules(csuList)
@@ -150,8 +159,6 @@ def g_extraParams():
 #+end_org """
 # cs.invOutcomeReportControl(cmnd=True, ro=True)
 ####+END:
-
-
 
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "CmndSvcs" :anchor ""  :extraInfo "Command Services Section"
 """ #+begin_org
@@ -186,8 +193,9 @@ class examples(cs.Cmnd):
 
         cs.examples.myName(cs.G.icmMyName(), cs.G.icmMyFullName())
         cs.examples.commonBrief()
+        csxuFps_csu.playerMenuExamples().pyCmnd()
 
-        if b.cs.G.plantOfThisSeed is None:
+        if seedsLib.seededCsxuInfo.seedOfThisPlant is None:
             djangoProc_csu.examples_csu().pyCmnd(
                 # pyKwArgs={'uploadPath': uploadPathAbs}
             )
@@ -195,10 +203,7 @@ class examples(cs.Cmnd):
             djangoProc_csu.examples_seed().pyCmnd(
                  # pyKwArgs={'uploadPath': uploadPathAbs}
             )
-
-            # Run default examples in PlantedCsu
-            cmndsSeed.plantedCsuExamplesRun()
-
+            seedsLib.plantedCsuExamplesRun()
 
         return(cmndOutcome)
 

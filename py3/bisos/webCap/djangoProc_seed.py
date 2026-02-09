@@ -83,7 +83,7 @@ import collections
 
 import atexit
 
-from bisos.b import cmndsSeed
+from bisos.csSeed import seedsLib
 
 seedCSMU = 'djangoProc-seed.cs'
 
@@ -100,7 +100,7 @@ def atexit_plantWithWhich(
 ** [[elisp:(org-cycle)][| *DocStr | ] shim over b.importFile.plantWithWhich
     #+end_org """
 
-    cmndsSeed.plantWithWhich(asExpected)
+    seedsLib.plantWithWhich(asExpected)
 
 
 ####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"
