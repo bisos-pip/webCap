@@ -193,13 +193,18 @@ facterModule.cs -i examples
         literal("ls -l /run/gunicorn.sock # MUST EXIST, things wont work without it")
         literal("gunicorn-csPlayerPerf-sysd.pcs")
         literal("gunicorn-csPlayerPerf-sysd.pcs -i sysdSysUnit  status # LOGS are redirected to journal")
-        literal("journalctl -u gunicorn -n 200  # Traffic in and out of django")
+        literal("journalctl --no-pager -u gunicorn -n 200  # Traffic in and out of django")
+        literal("journalctl --no-pager -u gunicorn -f          # tail -f")
         literal("nginx-sysd.pcs")
         literal("nginx-sysd.pcs -i sysdSysUnit  status")
 
         cs.examples.menuChapter('=RESTART Django and related services=')
         literal("python manage.py migrate")
         literal("python manage.py collectstatic # Needed for admin page etc")
+        literal("gunicorn-csPlayerPerf-sysd.pcs -i sysdSysUnit  restart # LOGS are redirected to journal")
+        literal("nginx-sysd.pcs -i sysdSysUnit  restart")
+
+
 
         return(cmndOutcome)
 

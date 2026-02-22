@@ -210,11 +210,11 @@ facterModule.cs -i examples
         if reactFramework == ReactFramework.React:
             literal("npm run build")
             literal("npm run build && nginx-sysd.pcs -i sysdSysUnit  restart") 
-            literal("npm run clean && npm run build && nginx-sysd.pcs -i sysdSysUnit  restart")                                   
+            literal("npm run clean && npm install && npm run build && nginx-sysd.pcs -i sysdSysUnit  restart")
         elif reactFramework == ReactFramework.Gatsby:
             literal("gatsby build")
             literal("gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart")
-            literal("gatsby clean && gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart")
+            literal("gatsby clean && npm install && gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart")
         elif  reactFramework== ReactFramework.NoneFound:
             log.info("No React framework detected; skipping Nginx restart.")
 
