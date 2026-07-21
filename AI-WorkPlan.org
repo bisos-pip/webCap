@@ -1,0 +1,188 @@
+#+title: Work Plan
+#+DATE: <2026-06-10 Wed 13:54>
+#+AUTHOR: Mohsen BANAN
+#+OPTIONS: toc:4
+#+TAGS: me ai aiAndMe
+
+# Provenance (installed once by startAiActivity.cs --- not regenerated):
+#   Date:      2026-07-21T11:43:28-07:00
+#   User:      bystar
+#   Templates: /bisos/apps/defaults/ai-templates
+#   Command:   /bisos/venv/py3/devbin/startAiActivity.cs -i initiate --root=repo --activity=bisos-pip
+
+####+BEGIN: b:ai:file/particulars
+* AI Working Context
+  Working Directory: /bisos/git/auth/bxRepos/bisos-pip/webCap
+  File: /bisos/git/auth/bxRepos/bisos-pip/webCap/AI-WorkPlan.org
+  Activity: bisos-pip
+  Companion Docs: AI-WORKFLOW.org, AI-Activity.org, AI-DevStatus.org, README.org
+####+END:
+
+This Work Plan file drives the AI collaborative development.
+Interactions are broken down into "Stages". Each Stage has a set
+of TODOs that I work with Claude to accomplish.
+
+Note to a fresh Claude: read this file together with AI-WORKFLOW.org,
+AI-Activity.org and AI-DevStatus.org to orient yourself. The =<<Context Confirmation>>=
+TODO below is the standard first step, or use =/bx-confirm0= as the automated equivalent.
+TODOs tagged =:ai:= are assigned to Claude. After completing a TODO, summarize results
+under =----- AI Results: ------= and mark it DONE.
+
+* Stage 1: Confirm AI's Understanding of This Repo's Context
+
+Goal: Confirm AI's understanding of the context and capture that in [[Context Confirmation]] TODO.
+
+
+* Stage 1 TODOs
+** +
+** TODO [#A] <<Context Confirmation>> for AI (typically triggered by /bx-confirm0) :ai:
+SCHEDULED: <2026-06-09 Tue>
+Based on the series of files starting from CLAUDE.md in this repo,
+describe succinctly what you have understood.
+Enumerate explicitly which files you have imported and which you have considered.
+----- AI Results: ------
+** -
+
+* Stage 2: Implement capWebVd — NGINX Virtual Host Capability Package
+
+Goal: Create a =capWebVd= seed package in =bisos.webCap= that mirrors the =-sysd.pcs=
+pattern: a =.pcs= file supplies a config-file-generator function and seedInfo parameters;
+the seed commands write/enable/verify the NGINX site config. Use =airflow-wvd.pcs= as
+the first concrete instance, proxying =airflow.here= to localhost port 8080.
+
+
+* Stage 2 TODOs
+** +
+
+** TODO [#A] <<Clean up facter leftovers>> in existing webCap py3/ files :ai:
+SCHEDULED: <2026-07-21 Mon>
+The existing files under =py3/bisos/webCap/= and =py3/bin/= are stale copies from an
+earlier template based on =facterModule.cs= / =djangoProc=. Specifically:
+- =py3/bin/csPlayerPerf-gunicorn-nginx.pcs= and =starterSidebar-gatsby-nginx.pcs= still
+  import =bisos.tocsModules.djangoProc_seed= and reference =facterModule.cs= / =targetRun=.
+  These need to be either removed or rewritten for the new capWebVd seed once it exists.
+- =py3/bisos/webCap/djangoProc_csu.py=, =djangoProc_seed.py=, =djangoProc_seedInfo.py=,
+  =reactProc_csu.py=, =reactProc_seed.py=, =reactProc_seedInfo.py= are Django/React/gunicorn
+  specific. Decide: keep as separate capability or remove if out of scope.
+- =py3/bin/nginx-seed.cs= still has =facter= references in its header.
+Inventory what to keep, what to delete, what to rename before adding new code.
+----- AI Results: ------
+Decision (2026-07-21):
+- Keep =djangoProc_*= and =reactProc_*= — they are legitimate separate capabilities
+  (gunicorn/django/react web process management), not facter leftovers, just out of
+  current scope.
+- *Remove* =py3/bin/csPlayerPerf-gunicorn-nginx.pcs= and
+  =py3/bin/starterSidebar-gatsby-nginx.pcs= — pure facter/djangoProc templates with
+  no real content; no longer needed.
+- =py3/bin/nginx-seed.cs= facter header is cosmetic; deferred.
+- New =capWebVd= files added alongside existing code without disturbing it.
+Pending (user action): delete the two stale =.pcs= files listed above.
+
+** DONE [#A] <<Create capWebVd_seedInfo>> — mirror of capDns_seedInfo :ai:
+CLOSED: [2026-07-21 Mon]
+SCHEDULED: <2026-07-21 Mon>
+Create =py3/bisos/webCap/capWebVd_seedInfo.py= containing:
+- =WebVdSpecMethod= enum (=nginxProxy= for now; placeholder for =apache= later)
+- =CmndsControlInfo= dataclass with fields: =webVdSpecMethod=, =serverName= (e.g.
+  =airflow.here=), =proxyPort= (e.g. =8080=, airflow's actual listening port),
+  =wvdConfigFunc= (a callable returning the NGINX config as a string, or =None=)
+- Singleton =cmndsControlInfo= instance
+- =setup()= function to populate it from the =.pcs= file
+Model exactly after =capDns_seedInfo.py= / =CmndsControlInfo= pattern.
+----- AI Results: ------
+Created =py3/bisos/webCap/capWebVd_seedInfo.py=:
+- =WebVdSpecMethod= enum: =nginxProxy= (active), =apache= (placeholder).
+- =CmndsControlInfo= dataclass: =webVdSpecMethod=, =serverName=, =proxyPort=,
+  =wvdConfigFunc=. Singleton enforced via =__new__=.
+- =cmndsControlInfo= singleton instantiated at module level.
+- =setup()= decorated =@cs.track=; called by =.pcs= files to populate the singleton.
+
+** DONE [#A] <<Create capWebVd_csu>> — mirror of capDns_csu :ai:
+CLOSED: [2026-07-21 Mon]
+SCHEDULED: <2026-07-21 Mon>
+Create =py3/bisos/webCap/capWebVd_csu.py= with four commands, mirroring
+=capDns_csu.py=:
+- =webVd_update=: call =wvdConfigFunc()= to get config string; write it (sudo) to
+  =/etc/nginx/sites-available/<serverName>=. Does NOT enable or reload — that is
+  =webVd_enable='s job.
+- =webVd_enable=: create symlink =/etc/nginx/sites-enabled/<serverName>= →
+  =../sites-available/<serverName>= (sudo); run =sudo nginx -t && sudo nginx -s reload=.
+  Idempotent — skip symlink creation if already present.
+- =webVd_disable=: remove the symlink from =sites-enabled/= (sudo); run
+  =sudo nginx -s reload=. Leaves =sites-available/= untouched.
+- =webVd_verify=: check that =sites-available/<serverName>= exists, symlink in
+  =sites-enabled/= is present, and =nginx -t= passes.
+- =webVd_resolve=: run =curl -s -o /dev/null -w "%{http_code}" http://<serverName>=
+  to confirm the virtual host responds.
+- =webVd_fqdnPing=: ping =serverName= once (reuse =capDns_fqdnPing= pattern).
+Also add =examples_csu= as a plain =@cs.track def= (not =cs.Cmnd= class — lesson
+learned from capDns).
+----- AI Results: ------
+Created =py3/bisos/webCap/capWebVd_csu.py= with all six commands + =examples_csu=:
+- =webVd_update=: writes config via tempfile + =sudo cp= to =sites-available/=.
+- =webVd_enable=: =sudo ln -s= (idempotent); =sudo nginx -t= then =sudo nginx -s reload=.
+- =webVd_disable=: =sudo rm= symlink from =sites-enabled/=; =sudo nginx -s reload=.
+  Leaves =sites-available/= untouched.
+- =webVd_verify=: checks =sites-available/= exists + symlink present + =sudo nginx -t=.
+- =webVd_resolve=: =curl -s -o /dev/null -w '%{http_code}'= against =http://<serverName>=.
+- =webVd_fqdnPing=: =ping -c 1 <serverName>=; accepts optional fqdn arg (same pattern
+  as =capDns_fqdnPing=).
+- =examples_csu=: plain =@cs.track def= — not =cs.Cmnd= class (avoids perfName error).
+
+** DONE [#A] <<Create capWebVd_seed.cs>> — entry point :ai:
+CLOSED: [2026-07-21 Mon]
+SCHEDULED: <2026-07-21 Mon>
+Create =py3/bin/capWebVd_seed.cs= as the seeded entry point, importing
+=capWebVd_csu= and =csCmndsList_csu=. Model after =capDns_seed.cs= exactly.
+Register in =py3/setup.py= scripts list.
+Locally reinstall the package editable so the new seed is on PATH.
+----- AI Results: ------
+Created =py3/bin/capWebVd_seed.cs= mirroring =capDns_seed.cs=:
+- =csuList=: =csxuFps_csu=, =capWebVd_csu=, =csCmndsList_csu=, =plantedCsu=.
+- =seedsLib= for planted seed detection.
+- Standard =examples= class + =g_csMain= entry point.
+setup.py registration and =pip install -e .= left to the user (managed via =pypiProc.sh=).
+
+** DONE [#A] <<Implement airflow-wvd.pcs>> — first concrete instance :aiAndMe:
+CLOSED: [2026-07-21 Mon]
+SCHEDULED: <2026-07-21 Mon>
+Implement =/bisos/asc/web/bin/airflow-wvd.pcs= (currently 0 bytes).
+Model after =airflow-webserver-sysd.pcs=:
+- Define =wvdConfigFunc()= returning an NGINX =server {}= block that proxies
+  =airflow.here= → =http://127.0.0.1:8080=. The config should set
+  =server_name airflow.here;= and =proxy_pass http://127.0.0.1:8080;=.
+- Import =capWebVd_seed= and call =capWebVd_seedInfo.setup(serverName="airflow.here",
+  proxyPort=8080, wvdConfigFunc=wvdConfigFunc)=.
+- Declare =csCmndsList= with =webVd_update=, =webVd_verify=, =webVd_resolve=,
+  =webVd_fqdnPing=.
+----- AI Results: ------
+Implemented =/bisos/asc/web/bin/airflow-wvd.pcs=:
+- =wvdConfigFunc()= returns NGINX =server {}= block: =listen 80=,
+  =server_name airflow.here=, =proxy_pass http://127.0.0.1:8080= with standard
+  proxy headers (=Host=, =X-Real-IP=, =X-Forwarded-For=).
+- Calls =capWebVd_seedInfo.setup(serverName="airflow.here", proxyPort=8080, wvdConfigFunc=wvdConfigFunc)=.
+- =csCmndsList=: =webVd_update=, =webVd_enable=, =webVd_verify=, =webVd_resolve=,
+  =webVd_fqdnPing= (5 commands; =webVd_disable= available in seed but not in default list).
+
+** TODO [#A] <<Verify airflow-wvd.pcs end-to-end>> :aiAndMe:
+SCHEDULED: <2026-07-21 Mon>
+After =pip install -e .= in =webCap/py3/= (user action), run end-to-end verify:
+- =airflow-wvd.pcs= (usage listing — shows 5 cmnds)
+- =airflow-wvd.pcs -i webVd_update= (writes config to sites-available/)
+- =airflow-wvd.pcs -i webVd_enable= (creates symlink, nginx -t, nginx reload)
+- =airflow-wvd.pcs -i webVd_verify= (config + symlink present, nginx -t passes)
+- =airflow-wvd.pcs -i webVd_resolve= (HTTP response from airflow.here)
+- =airflow-wvd.pcs -i webVd_fqdnPing= (ping airflow.here)
+- =airflow-wvd.pcs -i webVd_disable= (removes symlink, nginx reload)
+- =airflow-wvd.pcs -i webVd_verify= again (should now fail — symlink gone)
+Prerequisites: =capDns_update= must already have run so =airflow.here= resolves;
+airflow webserver must be running on port 8080 for =webVd_resolve= to return 200.
+----- AI Results: ------
+
+** -
+
+
+# Local Variables:
+# eval: (setq-local toc-org-max-depth 4)
+# eval: (setq-local org-log-done 'time)
+# End:

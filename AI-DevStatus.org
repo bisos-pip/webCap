@@ -1,0 +1,108 @@
+#+title: Development Status & Continuation Handoff
+#+TAGS: me ai aiAndMe
+
+# Provenance (installed once by startAiActivity.cs --- not regenerated):
+#   Date:      2026-07-21T11:43:28-07:00
+#   User:      bystar
+#   Templates: /bisos/apps/defaults/ai-templates
+#   Command:   /bisos/venv/py3/devbin/startAiActivity.cs -i initiate --root=repo --activity=bisos-pip
+
+####+BEGIN: b:ai:file/particulars
+* AI Working Context
+  Working Directory: /bisos/git/auth/bxRepos/bisos-pip/webCap
+  File: /bisos/git/auth/bxRepos/bisos-pip/webCap/AI-DevStatus.org
+  Activity: bisos-pip
+  Companion Docs: AI-WORKFLOW.org, AI-Activity.org, AI-DevStatus.org, README.org
+####+END:
+
+This file is a working-state handoff so development can continue on another
+machine (which has this repo but NOT the developer's =~=). It captures the
+architecture, what works, what is untested and the design decisions made so far.
+
+This file is maintained by Claude. Updates are typically triggered by the
+=/bx-update-status= slash command, after major interactions, or before a release.
+
+* Current State
+
+  Stage 2 implementation is complete (code written, not yet installed/verified).
+  All four implementation TODOs are marked DONE in AI-WorkPlan.org:
+  - =capWebVd_seedInfo.py= — created
+  - =capWebVd_csu.py= — created (6 commands)
+  - =capWebVd_seed.cs= — created
+  - =/bisos/asc/web/bin/airflow-wvd.pcs= — implemented (was 0 bytes)
+
+  Pending before end-to-end verify can run (user actions):
+  1. =pip install -e .= in =webCap/py3/= to put =capWebVd_seed.cs= on PATH
+  2. Add =bin/capWebVd_seed.cs= to =setup.py= scripts list via =pypiProc.sh=
+  3. Remove =py3/bin/csPlayerPerf-gunicorn-nginx.pcs= and
+     =py3/bin/starterSidebar-gatsby-nginx.pcs= (stale facter templates)
+
+  The verify TODO (=<<Verify airflow-wvd.pcs end-to-end>>=) is the next active step.
+  Prerequisites: =airflow.here= must resolve (=capDns_update= already verified in
+  =bisos-pip/capDns=); airflow webserver must be running on port 8080 for
+  =webVd_resolve= to return a non-error HTTP code.
+
+* Architecture
+
+  This package (=bisos.webCap=) manages NGINX virtual-host entries using the same
+  seeded =.pcs= pattern as =bisos.capDns=. The new =capWebVd= capability lives
+  alongside the existing (unrelated) =djangoProc= / =reactProc= gunicorn capabilities.
+
+  New files (all under =py3/=):
+
+  - =bisos/webCap/capWebVd_seedInfo.py= — =WebVdSpecMethod= enum + =CmndsControlInfo=
+    dataclass (singleton) + =setup()= function. The =.pcs= file calls =setup()= to
+    inject =serverName=, =proxyPort=, and =wvdConfigFunc= before declaring =csCmndsList=.
+  - =bisos/webCap/capWebVd_csu.py= — CS-Unit with 6 commands + =examples_csu=.
+  - =bin/capWebVd_seed.cs= — seeded entry point; =csuList= is
+    =csxuFps_csu + capWebVd_csu + csCmndsList_csu + plantedCsu=.
+
+  Concrete instance:
+  - =/bisos/asc/web/bin/airflow-wvd.pcs= — plants =capWebVd_seed.cs= for
+    =airflow.here → http://127.0.0.1:8080=.
+
+  NGINX file layout managed by =capWebVd_csu=:
+  - Config written to:  =/etc/nginx/sites-available/<serverName>=
+  - Symlink created at: =/etc/nginx/sites-enabled/<serverName>=
+
+* What Works
+
+  Code is written and imports are structured correctly (mirrors verified =capDns= pattern).
+  Not yet run — package not yet installed editable.
+
+* What Is Untested
+
+  Everything in =capWebVd= is untested pending =pip install -e .=:
+  - =webVd_update= writing config to =sites-available/=
+  - =webVd_enable= creating symlink + =nginx -t= + reload
+  - =webVd_disable= removing symlink + reload
+  - =webVd_verify= full pass and expected-fail after disable
+  - =webVd_resolve= curl HTTP check (also requires airflow webserver running)
+  - =webVd_fqdnPing= ping check (also requires =airflow.here= in =/etc/hosts=)
+  - =airflow-wvd.pcs= end-to-end run
+
+* Key Design Decisions
+
+  - *=webVd_update= does NOT enable*: writing the config file and enabling it are
+    separate operations, matching NGINX's own sites-available/sites-enabled idiom.
+    This allows a config to be staged before activating it.
+  - *=webVd_enable= is idempotent*: checks for existing symlink before creating;
+    always runs =nginx -t= and reload regardless.
+  - *=webVd_disable= leaves =sites-available/= untouched*: only the symlink is
+    removed, so the config is preserved for re-enabling.
+  - *=webVd_update= uses a tempfile + =sudo cp=*: writing directly to
+    =/etc/nginx/sites-available/= requires root; the pattern is write to a
+    user-owned tempfile then =sudo cp= it into place (same approach avoids
+    =sudo tee= or heredoc complexity).
+  - *=examples_csu= is a plain =@cs.track def= function* (not =cs.Cmnd= class):
+    class form triggers =AttributeError: 'Namespace' object has no attribute 'perfName'=
+    via the CS framework's =ro.py= layer. This is the same lesson learned in
+    =capDns_csu.py= — must use function form.
+  - *Existing =djangoProc_*= / =reactProc_*= files kept*: they are a separate
+    gunicorn/Django/React capability, not facter leftovers. Out of current scope
+    but not harmful.
+  - *=setup.py= managed by user via =pypiProc.sh=*: Claude does not touch =setup.py=.
+
+# Local Variables:
+# eval: (setq-local toc-org-max-depth 4)
+# End:
