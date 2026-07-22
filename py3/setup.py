@@ -43,7 +43,7 @@ def longDescription():
 # b:py3:pypi:setup/version Arguments  :forSys t :forPyPi t :constant "666"
 ####+BEGIN: b:py3:pypi:setup/version :comment "Auto Detected"
 
-# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.12 -- forLocalVersion=0.1 -- constant=NA
+# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.13 -- forLocalVersion=0.1 -- constant=NA
 def pkgVersion():
         return '0.1'
 
@@ -55,14 +55,10 @@ def pkgVersion():
 requires = [
 "bisos",
 "bisos.b",
-"bisos.basics",
 "bisos.capability",
 "bisos.common",
 "bisos.csPlayer",
 "bisos.csSeed",
-"bisos.debian",
-"bisos.sbom",
-"bisos.tocsModules",
 "setuptools==75.8.0",
 "wheel==0.38.4",
 ]
@@ -72,26 +68,14 @@ requires = [
 ####+BEGIN: b:py3:pypi:setup/scripts :comment ""
 
 scripts = [
-'bin/cbs-is-np-sysd_gunicorn-csPlayerPerf.pcs',
-'bin/csLineInvoker-react-nginx.pcs',
-'bin/csPlayerPerf-gunicorn-nginx.pcs',
-'bin/csPlayerUi-gatsby-nginx.pcs',
+'bin/capWebVd_seed.cs',
 'bin/djangoAdmin.cs',
 'bin/djangoProc-seed.cs',
 'bin/djangoProc.spcs',
-'bin/django-sbom.pcs',
 'bin/gunicornAdmin.cs',
-'bin/gunicorn-csPlayerPerf-sysd.pcs',
-'bin/gunicorn-sbom.pcs',
-'bin/gunicorn-socket-sysd.pcs',
-'bin/nginx-sbom.pcs',
 'bin/nginx-seed.cs',
-'bin/nginx-sysd.pcs',
-'bin/postgresql-sbom.pcs',
 'bin/reactProc-seed.cs',
 'bin/reactProc.spcs',
-'bin/starterSidebar-gatsby-nginx.pcs',
-'bin/webCap-csPlayers-assemble.cs',
 ]
 ####+END:
 

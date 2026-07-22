@@ -179,6 +179,15 @@ Prerequisites: =capDns_update= must already have run so =airflow.here= resolves;
 airflow webserver must be running on port 8080 for =webVd_resolve= to return 200.
 ----- AI Results: ------
 
+** TODO [#A] Config To Stdout, and update are missing -- Pattern it after systemd
+SCHEDULED: <2026-07-21 Mon>
+----- AI Results: ------
+
+** TODO [#A] Port number should come from banna. And IP Address from /etc/hosts
+SCHEDULED: <2026-07-21 Mon>
+----- AI Results: ------
+
+
 ** -
 
 
