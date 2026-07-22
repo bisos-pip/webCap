@@ -279,8 +279,8 @@ facterModule.cs -i examples
         cwd = pathlib.Path.cwd()
 
         print(f"{cwd}")
-        print(f"http://{reactProc_seedInfo.reactProcSeedInfo.webVirtualDomain}")
-        print(f"http://localhost:{reactProc_seedInfo.reactProcSeedInfo.dev_webPortNu}")
+        print(f"bx-browse-url.sh  http://{reactProc_seedInfo.reactProcSeedInfo.webVirtualDomain}")
+        print(f"bx-browse-url.sh  http://localhost:{reactProc_seedInfo.reactProcSeedInfo.dev_webPortNu}")
 
         return(cmndOutcome)
 

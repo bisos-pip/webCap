@@ -254,13 +254,19 @@ facterModule.cs -i examples
 
         cwd = pathlib.Path.cwd()
 
+        cs.examples.menuSection('=Development Mode=')
+
         print(f"{cwd}")
 
-        literal(f"python manage.py runserver 5000")
+        literal(f"python manage.py runserver {djangoProc_seedInfo.djangoProcSeedInfo.dev_webPortNu}")
 
-        print(f"http://{djangoProc_seedInfo.djangoProcSeedInfo.webVirtualDomain}")
-        print(f"http://localhost:{djangoProc_seedInfo.djangoProcSeedInfo.dev_webPortNu}/admin")
-        print(f"http://localhost:5000/admin")
+        print(f"bx-browse-url.sh http://{djangoProc_seedInfo.djangoProcSeedInfo.webVirtualDomain}")
+        print(f"bx-browse-url.sh http://localhost:{djangoProc_seedInfo.djangoProcSeedInfo.dev_webPortNu}/admin")
+
+        literal(f"echo === Conventional Django port is 5000 ===")
+
+        literal(f"python manage.py runserver 5000")
+        print(f"bx-browse-url.sh http://localhost:5000/admin")
 
         return(cmndOutcome)
 
