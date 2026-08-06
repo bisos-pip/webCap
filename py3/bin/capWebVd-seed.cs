@@ -43,9 +43,11 @@ if seedsLib.seededCsxuInfo.plantOfThisSeed is not None:
 ####+BEGIN: b:py3:cs:framework/csuListImportPlus
 from bisos.csPlayer import csxuFps_csu
 from bisos.webCap import capWebVd_csu
+from bisos.debian import configFile
+from bisos.b import clsMethod_csu
 from bisos.csSeed import csCmndsList_csu
 
-csuList = [ 'bisos.csPlayer.csxuFps_csu', 'bisos.webCap.capWebVd_csu', 'bisos.csSeed.csCmndsList_csu', 'plantedCsu', ]
+csuList = [ 'bisos.csPlayer.csxuFps_csu', 'bisos.webCap.capWebVd_csu', 'bisos.debian.configFile', 'bisos.b.clsMethod_csu', 'bisos.csSeed.csCmndsList_csu', 'plantedCsu', ]
 
 if seedsLib.seededCsxuInfo.plantOfThisSeed is None:
     csuList.remove('plantedCsu')
@@ -58,6 +60,9 @@ def g_extraParams():
     cs.argsparseBasedOnCsParams(csParams)
 
 ####+END:
+
+# Expose configFile_nginxVd to __main__ so configFile commands can resolve --cls=configFile_nginxVd
+configFile_nginxVd = capWebVd_csu.configFile_nginxVd
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "examples" :extent "verify" :ro "noCli"
 class examples(cs.Cmnd):

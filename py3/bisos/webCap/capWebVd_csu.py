@@ -14,7 +14,7 @@ import collections
 import typing
 import subprocess
 import pathlib
-import os
+import __main__
 
 ####+BEGIN: b:py3:cs:framework/imports :basedOn "classification"
 """ #+begin_org
@@ -25,6 +25,9 @@ from bisos.b import cs
 from bisos.b import b_io
 from bisos.common import csParam
 ####+END:
+
+from bisos.debian import configFile
+from bisos.basics import pyRunAs
 
 from bisos.webCap import capWebVd_seedInfo
 
@@ -38,6 +41,69 @@ def commonParamsSpecify(
     pass
 
 
+####+BEGIN: b:py3:class/decl :className "ConfigFile_nginxVd" :superClass "configFile.ConfigFile" :comment "" :classType "basic"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]]  Cls-basic  [[elisp:(outline-show-subtree+toggle)][||]] /ConfigFile_nginxVd/  superClass=configFile.ConfigFile  [[elisp:(org-cycle)][| ]]
+#+end_org """
+class ConfigFile_nginxVd(configFile.ConfigFile):
+####+END:
+    """ #+begin_org
+** [[elisp:(org-cycle)][| DocStr| ]]  ConfigFile subclass for NGINX virtual-host in sites-available/.
+    #+end_org """
+
+####+BEGIN: b:py3:cs:method/typing :methodName "configFilePath" :deco "default"
+    """ #+begin_org
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]]  Mtd-T-  [[elisp:(outline-show-subtree+toggle)][||]] /configFilePath/  deco=default  [[elisp:(org-cycle)][| ]]
+    #+end_org """
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def configFilePath(
+####+END:
+            self,
+    ) -> pathlib.Path:
+        """ #+begin_org
+*** [[elisp:(org-cycle)][| DocStr| ]]  Return path to /etc/nginx/sites-available/<serverName>.
+        #+end_org """
+        ci = capWebVd_seedInfo.cmndsControlInfo
+        return pathlib.Path(f'/etc/nginx/sites-available/{ci.serverName}')
+
+####+BEGIN: b:py3:cs:method/typing :methodName "configFileStr" :methodType "" :deco "default"
+    """ #+begin_org
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]]  Mtd-T-  [[elisp:(outline-show-subtree+toggle)][||]] /configFileStr/  deco=default  [[elisp:(org-cycle)][| ]]
+    #+end_org """
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def configFileStr(
+####+END:
+            self,
+    ) -> str | None:
+        """ #+begin_org
+*** [[elisp:(org-cycle)][| DocStr| ]]  Return NGINX config as string via wvdConfigFunc from seedInfo.
+        #+end_org """
+        ci = capWebVd_seedInfo.cmndsControlInfo
+        if ci.wvdConfigFunc is None:
+            print(f"EH_problem Missing capWebVd_seedInfo.cmndsControlInfo.wvdConfigFunc")
+            return None
+        return ci.wvdConfigFunc()
+
+####+BEGIN: b:py3:cs:method/typing :methodName "configFileUpdate" :methodType "eType" :retType "" :deco "default" :argsList ""
+    """ #+begin_org
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]]  Mtd-T-eType  [[elisp:(outline-show-subtree+toggle)][||]] /configFileUpdate/  deco=default  [[elisp:(org-cycle)][| ]]
+    #+end_org """
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def configFileUpdate(
+####+END:
+            self,
+    ):
+        """ #+begin_org
+*** [[elisp:(org-cycle)][| DocStr| ]]  Write config string to sites-available/ as root.
+        #+end_org """
+        contentStr = self.configFileStr()
+        destPath = self.configFilePath()
+        pyRunAs.as_root_writeToFile(destPath, contentStr)
+
+
+configFile_nginxVd = ConfigFile_nginxVd()
+
+
 ####+BEGIN: b:py3:cs:func/typing :funcName "examples_csu"
 @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
 def examples_csu(
@@ -46,67 +112,36 @@ def examples_csu(
 ) -> None:
     """Examples of capWebVd commands."""
 
+    od = collections.OrderedDict
     cmnd = cs.examples.cmndEnter
 
     if sectionTitle == 'default':
         cs.examples.menuChapter('*BISOS NGINX Virtual-Host Capability Commands*')
 
-    cs.examples.menuSection('/WebVd Capability Commands/')
-    cmnd('webVd_update',   comment="# Write NGINX config to sites-available/")
+    concreteConfigFilePars     = od([('cls', 'configFile_nginxVd'),])
+    concreteConfigFileRootPars = od([('cls', 'configFile_nginxVd'), ('runAs', 'root'),])
+
+    ci = capWebVd_seedInfo.cmndsControlInfo
+    filePath = configFile_nginxVd.configFilePath()
+
+    cs.examples.menuSection(f'*Config Content {filePath}*')
+    cmnd('configFileStdout', pars=concreteConfigFilePars,     comment="# That which will be stored in configFile")
+    cmnd('configFilePath',   pars=concreteConfigFilePars,     comment=f"# ls -l {filePath}")
+    cmnd('configFilePath',   pars=concreteConfigFileRootPars, comment=f"# sudo ls -l {filePath}")
+    cmnd('configFileUpdate', pars=concreteConfigFilePars,     comment=f"# write stdout to {filePath}")
+    cmnd('configFileUpdate', pars=concreteConfigFileRootPars, comment=f"# sudo write stdout to {filePath}")
+    cmnd('configFileCat',    pars=concreteConfigFilePars,     comment=f"# cat {filePath}")
+    cmnd('configFileCat',    pars=concreteConfigFileRootPars, comment=f"# sudo cat {filePath}")
+    cmnd('configFileVerify', pars=concreteConfigFilePars,     comment=f"# are stdout and {filePath} the same")
+    cmnd('configFileDelete', pars=concreteConfigFilePars,     comment=f"# delete {filePath}")
+    cmnd('configFileDelete', pars=concreteConfigFileRootPars, comment=f"# sudo delete {filePath}")
+
+    cs.examples.menuSection('/WebVd Enable/Disable/Verify Commands/')
     cmnd('webVd_enable',   comment="# Symlink into sites-enabled/ + nginx reload")
     cmnd('webVd_disable',  comment="# Remove symlink from sites-enabled/ + nginx reload")
-    cmnd('webVd_verify',   comment="# Verify config + symlink present + nginx -t")
+    cmnd('webVd_verify',   comment="# Verify symlink present + nginx -t")
     cmnd('webVd_resolve',  comment="# curl HTTP check against serverName")
     cmnd('webVd_fqdnPing', comment="# Ping serverName once")
-
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "webVd_update"
-class webVd_update(cs.Cmnd):
-    cmndParamsMandatory = []
-    cmndParamsOptional  = []
-    cmndArgsLen = {'Min': 0, 'Max': 0,}
-
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmnd(self,
-             rtInv: cs.RtInvoker,
-             cmndOutcome: b.op.Outcome,
-    ) -> b.op.Outcome:
-####+END:
-        """Write NGINX config to /etc/nginx/sites-available/<serverName>. Does NOT enable."""
-
-        failed = b_io.eh.badOutcome
-        callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
-            return failed(cmndOutcome)
-
-        ci = capWebVd_seedInfo.cmndsControlInfo
-        if ci.serverName is None:
-            b_io.ann.note("ERROR: serverName is not set in cmndsControlInfo")
-            return failed(cmndOutcome)
-        if ci.wvdConfigFunc is None:
-            b_io.ann.note("ERROR: wvdConfigFunc is not set in cmndsControlInfo")
-            return failed(cmndOutcome)
-
-        configStr = ci.wvdConfigFunc()
-        sitesAvailable = pathlib.Path(f'/etc/nginx/sites-available/{ci.serverName}')
-
-        import tempfile
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.nginx.conf', delete=False) as tmp:
-            tmp.write(configStr)
-            tmpPath = tmp.name
-
-        result = subprocess.run(
-            ['sudo', 'cp', tmpPath, str(sitesAvailable)],
-            capture_output=True, text=True,
-        )
-        os.unlink(tmpPath)
-
-        if result.returncode != 0:
-            b_io.ann.note(f"ERROR: failed to write {sitesAvailable}: {result.stderr}")
-            return failed(cmndOutcome)
-
-        b_io.ann.note(f"webVd_update: wrote config to {sitesAvailable}")
-        return cmndOutcome.set(opError=b.OpError.Success)
 
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "webVd_enable"
@@ -137,7 +172,7 @@ class webVd_enable(cs.Cmnd):
         sitesEnabled   = pathlib.Path(f'/etc/nginx/sites-enabled/{ci.serverName}')
 
         if not sitesAvailable.exists():
-            b_io.ann.note(f"ERROR: {sitesAvailable} does not exist — run webVd_update first")
+            b_io.ann.note(f"ERROR: {sitesAvailable} does not exist — run configFileUpdate first")
             return failed(cmndOutcome)
 
         if sitesEnabled.is_symlink():
@@ -234,7 +269,7 @@ class webVd_verify(cs.Cmnd):
              cmndOutcome: b.op.Outcome,
     ) -> b.op.Outcome:
 ####+END:
-        """Check sites-available/ exists, symlink in sites-enabled/ present, nginx -t passes."""
+        """Check symlink in sites-enabled/ is present and nginx -t passes."""
 
         failed = b_io.eh.badOutcome
         callParamsDict = {}

@@ -43,9 +43,9 @@ def longDescription():
 # b:py3:pypi:setup/version Arguments  :forSys t :forPyPi t :constant "666"
 ####+BEGIN: b:py3:pypi:setup/version :comment "Auto Detected"
 
-# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.13 -- forLocalVersion=0.1 -- constant=NA
+# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.14 -- forLocalVersion=0.13 -- constant=NA
 def pkgVersion():
-        return '0.1'
+        return '0.13'
 
 ####+END:
 
@@ -68,7 +68,8 @@ requires = [
 ####+BEGIN: b:py3:pypi:setup/scripts :comment ""
 
 scripts = [
-'bin/capWebVd_seed.cs',
+'bin/airflow-wvd.pcs',
+'bin/capWebVd-seed.cs',
 'bin/djangoAdmin.cs',
 'bin/djangoProc-seed.cs',
 'bin/djangoProc.spcs',

@@ -164,27 +164,41 @@ Implemented =/bisos/asc/web/bin/airflow-wvd.pcs=:
 - =csCmndsList=: =webVd_update=, =webVd_enable=, =webVd_verify=, =webVd_resolve=,
   =webVd_fqdnPing= (5 commands; =webVd_disable= available in seed but not in default list).
 
+** DONE [#A] Config To Stdout, and update are missing -- Pattern it after systemd
+CLOSED: [2026-08-05 Wed]
+SCHEDULED: <2026-08-04 Tue 22:30>
+Current implementation is inconsistent with other similar packages.
+The systemd pattern in /bxRepos/bisos-pip/debian/ is what we want here.
+Based on plant information, we produce what can go to stdout.
+We then capture that stdout into appropriately named file.
+Re-implement to align with systemd plants.
+----- AI Results: ------
+Re-implemented =capWebVd= to use the =configFile.ConfigFile= pattern (mirroring systemd in =bisos.debian=):
+- Added =ConfigFile_nginxVd(configFile.ConfigFile)= subclass to =capWebVd_csu.py= with =configFilePath=,
+  =configFileStr=, and =configFileUpdate= methods. Singleton =configFile_nginxVd= instantiated at module level.
+- Removed bespoke =webVd_update= command; =configFileStdout= and =configFileUpdate= (via =--cls=) replace it.
+- Added =bisos.debian.configFile= and =bisos.b.clsMethod_csu= to =csuList= in =capWebVd-seed.cs=;
+  exposed =configFile_nginxVd= singleton at seed module level for =--cls= resolution.
+- Updated both =airflow-wvd.pcs= files to use =configFileStdout= and =configFileUpdate= in =csCmndsList=.
+- Captured the pattern as =.claude/skills/configfile-pattern/SKILL.md=.
+
+** DONE [#A] Port number should come from banna. And IP Address from /etc/hosts
+CLOSED: [2026-08-05 Wed]
+SCHEDULED: <2026-07-21 Mon>
+----- AI Results: ------
+Updated both =airflow-wvd.pcs= files (=py3/bin/= and =/bisos/asc/web/bin/=):
+- Port: replaced hardcoded =8080= with =bannaTcpPorts.tcpPortsAssignedList.tcpPortsList['airflow'].portNu= (→ =24006=)
+- IP: replaced hardcoded =127.0.0.1= with =socket.gethostbyname('airflow.here')= (→ =127.0.22.100= from =/etc/hosts=)
+- =capWebVd_seedInfo.setup()= now receives the banna-sourced =proxyPort= instead of =8080=.
+- Created =.claude/skills/banna-lookup/SKILL.md= capturing the pattern; registered in =AI-Activity.org=.
+
 ** TODO [#A] <<Verify airflow-wvd.pcs end-to-end>> :aiAndMe:
 SCHEDULED: <2026-07-21 Mon>
 After =pip install -e .= in =webCap/py3/= (user action), run end-to-end verify:
 - =airflow-wvd.pcs= (usage listing — shows 5 cmnds)
 - =airflow-wvd.pcs -i webVd_update= (writes config to sites-available/)
-- =airflow-wvd.pcs -i webVd_enable= (creates symlink, nginx -t, nginx reload)
-- =airflow-wvd.pcs -i webVd_verify= (config + symlink present, nginx -t passes)
-- =airflow-wvd.pcs -i webVd_resolve= (HTTP response from airflow.here)
-- =airflow-wvd.pcs -i webVd_fqdnPing= (ping airflow.here)
-- =airflow-wvd.pcs -i webVd_disable= (removes symlink, nginx reload)
-- =airflow-wvd.pcs -i webVd_verify= again (should now fail — symlink gone)
+- etc
 Prerequisites: =capDns_update= must already have run so =airflow.here= resolves;
-airflow webserver must be running on port 8080 for =webVd_resolve= to return 200.
------ AI Results: ------
-
-** TODO [#A] Config To Stdout, and update are missing -- Pattern it after systemd
-SCHEDULED: <2026-07-21 Mon>
------ AI Results: ------
-
-** TODO [#A] Port number should come from banna. And IP Address from /etc/hosts
-SCHEDULED: <2026-07-21 Mon>
 ----- AI Results: ------
 
 
