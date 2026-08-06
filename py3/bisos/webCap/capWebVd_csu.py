@@ -195,15 +195,18 @@ class webVd_enable(cs.Cmnd):
             b_io.ann.note(f"ERROR: nginx -t failed:\n{testResult.stderr}")
             return failed(cmndOutcome)
 
+        # Always reload via the systemd-managed unit so a just-written config
+        # is guaranteed to be picked up (nginx -s reload can leave stale workers
+        # if the reload raced the config write).
         reloadResult = subprocess.run(
-            ['sudo', 'nginx', '-s', 'reload'],
+            ['sudo', 'systemctl', 'reload', 'nginx'],
             capture_output=True, text=True,
         )
         if reloadResult.returncode != 0:
             b_io.ann.note(f"ERROR: nginx reload failed: {reloadResult.stderr}")
             return failed(cmndOutcome)
 
-        b_io.ann.note(f"webVd_enable: nginx reloaded for {ci.serverName}")
+        b_io.ann.note(f"webVd_enable: nginx reloaded (systemctl) for {ci.serverName}")
         return cmndOutcome.set(opError=b.OpError.Success)
 
 
