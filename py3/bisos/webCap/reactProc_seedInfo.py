@@ -83,7 +83,7 @@ import collections
 
 from dataclasses import dataclass, field
 
-from bisos.csSeed import cmnds_seedInfo
+from bisos.csSeed import csCmndsList_seedInfo
 
 ####+BEGIN: bx:cs:py3:section :title "Public Classes"
 """ #+begin_org
@@ -152,8 +152,9 @@ def setup(
     #+end_org """
     if examplesFuncsList is not None:
         reactProcSeedInfo.examplesFuncsList  = examplesFuncsList
-        cmnds_seedInfo.setup(
-            examplesFuncsList=examplesFuncsList,
+        csCmndsList_seedInfo.setup(
+            # examplesFuncsList=examplesFuncsList,
+            csCmndsList=examplesFuncsList,
         )
     reactProcSeedInfo.reactFramework = reactFramework
     reactProcSeedInfo.webVirtualDomain = webVirtualDomain
