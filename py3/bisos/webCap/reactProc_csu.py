@@ -194,13 +194,20 @@ facterModule.cs -i examples
         cs.examples.menuChapter('=RESTART Nginx and related services=')
         literal("nginx-sysd.pcs -i sysdSysUnit  restart")
 
+        def inSite(cmd: str) -> str:
+
+            siteDir = reactProc_seedInfo.reactProcSeedInfo.siteDir
+
+            return f"(cd {siteDir} && {cmd})" if siteDir else cmd
+
+
         cs.examples.menuChapter('=React/Gatsby NPM Development=')
 
         reactFramework = whichReactFramework_()
         if reactFramework == ReactFramework.React:
-            literal("npm run watch")
+            literal(inSite("npm run watch"))
         elif reactFramework == ReactFramework.Gatsby:
-            literal("gatsby develop")
+            literal(inSite("gatsby develop"))
         elif  reactFramework== ReactFramework.NoneFound:
             log.info("No React framework detected; skipping Nginx restart.")
 
@@ -208,13 +215,13 @@ facterModule.cs -i examples
 
         reactFramework = whichReactFramework_()
         if reactFramework == ReactFramework.React:
-            literal("npm run build")
-            literal("npm run build && nginx-sysd.pcs -i sysdSysUnit  restart") 
-            literal("npm run clean && npm install && npm run build && nginx-sysd.pcs -i sysdSysUnit  restart")
+            literal(inSite("npm run build"))
+            literal(inSite("npm run build && nginx-sysd.pcs -i sysdSysUnit  restart")) 
+            literal(inSite("npm run clean && npm install && npm run build && nginx-sysd.pcs -i sysdSysUnit  restart"))
         elif reactFramework == ReactFramework.Gatsby:
-            literal("gatsby build")
-            literal("gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart")
-            literal("gatsby clean && npm install && gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart")
+            literal(inSite("gatsby build"))
+            literal(inSite("gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart"))
+            literal(inSite("gatsby clean && npm install && gatsby build && nginx-sysd.pcs -i sysdSysUnit  restart"))
         elif  reactFramework== ReactFramework.NoneFound:
             log.info("No React framework detected; skipping Nginx restart.")
 
@@ -222,11 +229,11 @@ facterModule.cs -i examples
 
         reactFramework = whichReactFramework_()
         if reactFramework == ReactFramework.React:
-            literal("npm run clean")
-            literal("npm run clean && nginx-sysd.pcs -i sysdSysUnit  restart")
+            literal(inSite("npm run clean"))
+            literal(inSite("npm run clean && nginx-sysd.pcs -i sysdSysUnit  restart"))
         elif reactFramework == ReactFramework.Gatsby:
-            literal("gatsby clean")
-            literal("gatsby clean && nginx-sysd.pcs -i sysdSysUnit  restart")
+            literal(inSite("gatsby clean"))
+            literal(inSite("gatsby clean && nginx-sysd.pcs -i sysdSysUnit  restart"))
         elif  reactFramework== ReactFramework.NoneFound:
             log.info("No React framework detected; skipping Nginx restart.")
 
@@ -276,9 +283,8 @@ facterModule.cs -i examples
 
         assert reactProc_seedInfo.reactProcSeedInfo.reactFramework == whichReactFramework_()
 
-        cwd = pathlib.Path.cwd()
-
-        print(f"{cwd}")
+        siteDir = reactProc_seedInfo.reactProcSeedInfo.siteDir
+        print(f"{pathlib.Path(siteDir).resolve() if siteDir else pathlib.Path.cwd()}")
         print(f"bx-browse-url.sh  http://{reactProc_seedInfo.reactProcSeedInfo.webVirtualDomain}")
         print(f"bx-browse-url.sh  http://localhost:{reactProc_seedInfo.reactProcSeedInfo.dev_webPortNu}")
 
@@ -306,8 +312,9 @@ def whichReactFramework_(
         """ #+begin_org
 ** [[elisp:(org-cycle)][| *DocStr | ] Look in the current directory for files that indicate which React framework is being used.
         #+end_org """
-        # Check for Gatsby-specific configuration files
-        current_dir = pathlib.Path('.')
+        # Check for Gatsby-specific configuration files, in the declared siteDir or the current directory
+        siteDir = reactProc_seedInfo.reactProcSeedInfo.siteDir
+        current_dir = pathlib.Path(siteDir) if siteDir else pathlib.Path('.')
         
         # Gatsby indicators
         gatsby_config_files = [

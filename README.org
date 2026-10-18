@@ -64,6 +64,23 @@ bisos.webCap is a python package that uses the  [[https://github.com/bisos-pip/p
 | reveal.js                                         |                 |         |
 | https://github.com/bouzidanas/react-reveal-slides |                 |         |
 
+** Static Sites --- Astro and the Content Tree
+
+A BISOS static site keeps its capability, content and site apart under one directory: =astroProc.spcs=
+(planted on =astroProc-seed.cs=), =cbm/= (CBS, assemble, vhost, dns entry), =content/tree/= (the pages,
+in the model of the ByStar Plone 3 ContentTree), =content/bin/= (content scripts) and =site/= (Astro).
+Start from =bisos-web/astro-starter-bystar=; the =astro-site= activity and the =astro-site-authorship=
+skill describe it (2026-10-18).
+
+| Module            | What it is                                                                   |
+|-------------------+------------------------------------------------------------------------------|
+| =contentTree_csu= | engine-neutral: read, validate, =pageLcnt= bodies (HeVeA, RTL), =files=      |
+|                   | nodes, Plone 3 ContentTree import; Cmnds =contentTree*=                      |
+| =astroProc_csu=   | Astro: =contentBuild=, =siteBuild=, =siteVerify=, =siteInfo=, from the       |
+|                   | planted file's directory                                                     |
+| =astroProc_seed*= | the seed hook and what a planted =astroProc.spcs= declares (fqdn, dev port)  |
+| =reactProc_*=     | React/Gatsby; =setup(siteDir=...)= (2026-10-18) for a site in a subdirectory |
+
 * BISOS Web Apps
 
 ** csPlayer

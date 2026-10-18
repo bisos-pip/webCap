@@ -83,7 +83,7 @@ import collections
 
 from dataclasses import dataclass, field
 
-from bisos.csSeed import csCmndsList_seedInfo
+from bisos.csSeed import addCmnds_seedInfo
 
 ####+BEGIN: bx:cs:py3:section :title "Public Classes"
 """ #+begin_org
@@ -109,6 +109,7 @@ class ReactProcSeedInfo(object):
     reactFramework: str | None = None
     webVirtualDomain: str | None = None
     dev_webPortNu: int | None = None
+    siteDir: str | None = None   # the React/Gatsby directory; default: the current directory
 
     def __post_init__(self):
         # default_factory machinery does not have access to self, hence in post_init:
@@ -146,19 +147,20 @@ def setup(
         reactFramework: str | None = None,
         webVirtualDomain: str | None = None,
         dev_webPortNu: int | None = None,
+        siteDir: str | None = None,
 ):
     """ #+begin_org
 ** [[elisp:(org-cycle)][| *DocStr | ]
     #+end_org """
     if examplesFuncsList is not None:
         reactProcSeedInfo.examplesFuncsList  = examplesFuncsList
-        csCmndsList_seedInfo.setup(
-            # examplesFuncsList=examplesFuncsList,
-            csCmndsList=examplesFuncsList,
-        )
+        # Shown by the seed's examples: seedsLib.plantedCsuExamplesRun reads addCmnds_seedInfo.
+        # (Passed to csCmndsList_seedInfo before 2026-10-17, where they were never shown.)
+        addCmnds_seedInfo.cmndsSeedInfo.examplesFuncsList = examplesFuncsList
     reactProcSeedInfo.reactFramework = reactFramework
     reactProcSeedInfo.webVirtualDomain = webVirtualDomain
     reactProcSeedInfo.dev_webPortNu = dev_webPortNu
+    reactProcSeedInfo.siteDir = siteDir
 
 ####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"
 """ #+begin_org
