@@ -13,14 +13,27 @@
 * Overview and Relevant Pointers
 #+end_org """
 
+import pathlib
+import subprocess
+
 from bisos import b
 
 from bisos.debian import systemd_seedInfo
 from bisos.debian import systemd_seed
 
+
+def noIpv6() -> None:
+    """Before ensure restarts nginx: on a host without IPv6 (a container), comment out the [::] listen
+    lines (Debian's default site has one), or nginx -t fails with socket() [::]:80 failed (97). A no-op
+    when IPv6 is enabled. capability AI-WorkPlan.org 4.1."""
+    script = pathlib.Path(__file__).resolve().parent / "nginx-noIpv6.sh"
+    subprocess.run(["sudo", str(script)], check=False)
+
+
 systemd_seedInfo.setup(
     seedType="sysdSysUnit",  # or userUnit
     sysdUnitName="nginx",
     sysdUnitFileFunc=None,
+    preFunc=noIpv6,
 )
 

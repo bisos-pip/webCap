@@ -19,9 +19,9 @@ if [ "$IPV6_DISABLED" -eq 1 ]; then
     echo "??  System status: IPv6 is DISABLED."
     echo "???  Scanning Nginx configuration files for IPv6 bindings..."
 
-    # Find all Nginx files in /etc/nginx/ that contain 'listen' and '[::]'
-    # We use -l to just get the file paths, filtering out commented lines
-    NGINX_FILES=$(grep -rl "listen" /etc/nginx/ --include="*.conf" --include="default" 2>/dev/null | xargs grep -l "\[::\]" 2>/dev/null || true)
+    # Find all Nginx files in /etc/nginx/ with an active (uncommented) 'listen ... [::]' line.
+    # A file already patched is left alone, so a re-run is a no-op and keeps the first backup.
+    NGINX_FILES=$(grep -rlE '^[[:space:]]*listen[[:space:]].*\[::\]' /etc/nginx/ --include="*.conf" --include="default" 2>/dev/null || true)
 
     if [ -z "$NGINX_FILES" ]; then
         echo "? No active IPv6 listen directives found in Nginx configs."

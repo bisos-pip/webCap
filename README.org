@@ -50,6 +50,19 @@ bisos.webCap is a python package that uses the  [[https://github.com/bisos-pip/p
 | nginx           | BISOS Module Name | Comment |
 | virtual domains |                   |         |
 
+- =nginx-cbs.pcs=, =nginx-sbom.pcs=, =nginx-sysd.pcs= --- nginx as a capability. =nginx-sysd.pcs= runs
+  =nginx-noIpv6.sh= before it restarts nginx: on a host without IPv6 it comments out =listen ... [::]=
+  lines (Debian's default site has one), which otherwise make =nginx -t= fail.
+- =webSitesEnabled.cs= --- the sites this host's nginx serves, from =nginx -T= (via =nginxSites.py=):
+
+| Cmnd               | What it does                                                               |
+|--------------------+----------------------------------------------------------------------------|
+| =sitesList=        | the FQDNs (not =_=, wildcards or regex names)                              |
+| =verify=           | read-only: URL, HTTP status, base directory or proxy target, file          |
+| =browse [fqdn ..]= | open them (default all) as browser tabs                                    |
+| =report=           | =verify=, then =browse=                                                    |
+| =baseFind fqdn=    | the directory the FQDN is served from; none for a proxied site             |
+
 ** Python Back-End
 
 | django   | djangoAdmin.cs | Comment   |
@@ -80,6 +93,8 @@ skill describe it (2026-10-18).
 |                   | planted file's directory                                                     |
 | =astroProc_seed*= | the seed hook and what a planted =astroProc.spcs= declares (fqdn, dev port)  |
 | =reactProc_*=     | React/Gatsby; =setup(siteDir=...)= (2026-10-18) for a site in a subdirectory |
+| =nodeEnv=         | loads the user's nvm (=NVM_DIR=, else =$XDG_CONFIG_HOME/nvm=, else =~/.nvm=) |
+|                   | before node, npm and npx, which builds run in non-interactive shells         |
 
 * BISOS Web Apps
 

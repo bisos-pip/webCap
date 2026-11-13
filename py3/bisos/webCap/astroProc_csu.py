@@ -109,6 +109,7 @@ import urllib.request
 from bisos.csSeed import seedsLib
 from bisos.webCap import astroProc_seedInfo
 from bisos.webCap import contentTree_csu
+from bisos.webCap import nodeEnv
 
 ####+BEGIN: b:py3:cs:orgItem/basic :type "=Executes=  "  :title "CSU-Lib Executions" :comment "-- cs.invOutcomeReportControl"
 """ #+begin_org
@@ -252,7 +253,7 @@ def siteBuild_(
         return [f"{site}/package-lock.json is missing: run npm install there once (and keep the lock file under git)"]
     for cmd in (["npm", "ci", "--no-audit", "--no-fund"], ["npx", "astro", "build"]):
         print(f"running: {' '.join(cmd)}  (in {site})")
-        if subprocess.run(cmd, cwd=site).returncode != 0:
+        if subprocess.run(nodeEnv.withNvm(cmd), cwd=site).returncode != 0:
             return [f"{' '.join(cmd)} failed in {site}"]
     return []
 

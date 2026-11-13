@@ -42,6 +42,25 @@ This file is maintained by Claude. Updates are typically triggered by the
   =bisos-pip/capDns=); airflow webserver must be running on port 8080 for
   =webVd_resolve= to return a non-error HTTP code.
 
+  2026-11-13 (uncommitted; recorded in =bisos-pip/capability/AI-WorkPlan.org= 4.1, not here):
+  =py3/bin/nginx-sysd.pcs= now runs =nginx-noIpv6.sh= as its =preFunc=, so =ensure= comments out
+  =listen ... [::]= lines (Debian's default site has one) on a host without IPv6 before it restarts
+  nginx; and =nginx-noIpv6.sh= only patches active lines, so a re-run is a no-op. Verified through the
+  nginx CBM leaf on a container (no IPv6); not on a host with IPv6.
+
+  2026-11-13 (uncommitted; the Node part recorded in =bisos-pip/capability/AI-WorkPlan.org= 4.3):
+  - =py3/bisos/webCap/nodeEnv.py= (new): loads the user's nvm (=NVM_DIR=, else =$XDG_CONFIG_HOME/nvm=,
+    else =~/.nvm=) before node/npm/npx in non-interactive shells; =astroProc_csu.siteBuild_= uses it.
+  - =py3/bin/webSitesEnabled.cs= (new, user's request; AI-WorkPlan.org =<<3.1>>=) with
+    =py3/bisos/webCap/nginxSites.py= (new): the sites this host's nginx serves, parsed from =nginx -T= (each included file is its own section there,
+    so a =sites-enabled/= server block is at the top of its section). Cmnds: =sitesList=, =verify=
+    (read-only; HTTP status, redirects not followed; base dir or proxy target; file), =browse [fqdn ...]=
+    (one =firefox --new-tab= call, else =xdg-open= per URL), =report= (verify + browse), =baseFind fqdn=
+    (root/alias of =location /=; none for a proxied site). Generated with the cbm-package-authorship
+    skill's =makeCs.py=. Tested on this container: 10 sites, 10 answer; baseFind on platform.here,
+    csPlayerUi.here, airflow.here, an unknown name; browse opened one tab. =setup.py= scripts list not
+    regenerated (=pypiProc.sh=), so the =.cs= is not on PATH from the venv yet.
+
 * Architecture
 
   This package (=bisos.webCap=) manages NGINX virtual-host entries using the same

@@ -207,6 +207,39 @@ Prerequisites: =capDns_update= must already have run so =airflow.here= resolves;
 
 ** -
 
+* Stage 3: Report on the Sites nginx Serves
+
+Goal: after a CBM walk (=sysCbmManage.cs -i fullyMaterialize=, bisos.capability), see what nginx serves
+--- the FQDNs, whether they answer, and where each is served from --- and open them as browser tabs.
+
+* Stage 3 TODOs
+** +
+** TODO [#A] <<3.1>> =webSitesEnabled.cs= --- list, verify, browse, baseFind :aiAndMe:
+SCHEDULED: <2026-11-13 Fri>
+User's request (2026-11-13): a =webSitesEnabled.cs= next to the nginx files in =py3/bin/= that walks
+what is enabled, finds the FQDNs and sends them to the browser as tabs; =nginx -T= as a literal in its
+examples; and =-i baseFind fqdn=: given an FQDN served from a base directory, that directory.
+----- AI Results: ------
+2026-11-13 (Claude): done, uncommitted.
+- nginx has no command that lists server names; =nginx -T= prints the configuration it loaded, so it
+  is the source (not the file names in =sites-enabled/=). Each included file is a section of its own in
+  that output: a =sites-enabled/= server block is at the top of its section, not inside =http {}=.
+- =py3/bisos/webCap/nginxSites.py= (new): parses =nginx -T= (run with =sudo -n= when not root) into
+  =Site= records (server names, listen lines, file, =root=/=alias= or =proxy_pass= of =location /=);
+  =fqdnUrls()=, =siteOf()=, =baseDir()=, =httpStatus()= (no redirects followed, no proxies),
+  =browse()= (one =firefox --new-tab= call, else =xdg-open= per URL).
+- =py3/bin/webSitesEnabled.cs= (new; made with the cbm-package-authorship skill's =makeCs.py=):
+  =sitesList= (named so: a class =list= shadows Python's), =verify= (read-only table; result "N of M sites answer"),
+  =browse [fqdn ...]= (default all), =report= (verify, then browse), =baseFind fqdn= (the configured
+  directory, and where it resolves to; none for a proxied site, which prints its =proxy_pass=).
+- Tested on this container: 10 =.here= sites, all answer (200; grafana, prometheus 302); baseFind on
+  platform.here, csPlayerUi.here, airflow.here (proxied) and an unknown name (clean failure); =browse
+  platform.here= started =firefox-esr --new-tab=. =report= not run (it opens every site).
+- Not done: =setup.py= scripts list (=pypiProc.sh=), so not on PATH from the venv; a Blee panel.
+  Possible next: =baseFind= also giving the git top-level or the site's =cbm/=; =verify= as the last
+  step of =fullyMaterialize= (a real pass/fail, bisos.capability WorkPlan 4.8); browse through Blee.
+** -
+
 
 # Local Variables:
 # eval: (setq-local toc-org-max-depth 4)
