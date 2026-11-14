@@ -240,6 +240,29 @@ examples; and =-i baseFind fqdn=: given an FQDN served from a base directory, th
   step of =fullyMaterialize= (a real pass/fail, bisos.capability WorkPlan 4.8); browse through Blee.
 ** -
 
+* Stage 4: The LCNT Library of an Astro Site
+
+<<Stage 4>>
+
+Goal: from the documents the lcnt =localWeb= export landed under a site's =var/lcnt/=, generate a Library tab and an
+access page per release. The contract is =/bisos/asc/web/astro/lcntLibrary/README.org=.
+
+* Stage 4 TODOs
+** +
+** TODO [#A] <<4.1>> =astroSite.cs= and the library generator :aiAndMe:
+----- AI Results: ------
+Built and run 2026-11-14 on three example documents; not marked DONE; awaiting the user's review.
+- =py3/bin/astroSite.cs= over =astroSite_csu.py= (=siteBase=) and =astroLcntLibrary_csu.py= (=libraryGenerate=):
+  standard library only, reads =meta.pyl=, writes content-tree nodes (the Library page and an access page per
+  release, plus a latest alias), built aside and renamed in.
+- =webVd_nginxSites.lcntVarLocations()= adds the =/lcnt/= locations to a vhost (=meta.pyl= answers 404);
+  =astroProc_csu.py= was adjusted for the site build.
+- The new =_csu.py= files carry the =file/dblockControls= dblock, without which =bx-dblock= expands them wrongly.
+- Documented in =README.org= (Static Sites). Works on the starter site with three examples.
+- Not done: other sites' vhosts are not regenerated; no unit tests.
+
+** -
+
 
 # Local Variables:
 # eval: (setq-local toc-org-max-depth 4)

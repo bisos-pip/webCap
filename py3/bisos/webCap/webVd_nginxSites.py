@@ -96,6 +96,7 @@ import collections
 
 import pathlib
 import enum
+import os
 
 from bisos.webCap import reactProc_seedInfo
 
@@ -145,6 +146,30 @@ server {{
         try_files $uri $uri/ =404;
     }}
 }}
+"""
+
+def lcntVarLocations(rootBaseDir: str) -> str:
+    """ The nginx location blocks that serve the LCNT documents landed in <siteBase>/var/lcnt/ under /lcnt/.
+
+    rootBaseDir is the vhost's root, <siteBase>/site/dist. The built site is tried first (the access pages are Astro pages
+    under the same /lcnt/ prefix as the documents' files), and a file it does not have is looked for in var/. Meant to be
+    placed inside the server block, after the "location /" block; only /lcnt/ reaches var/.
+    """
+    varDir = os.path.join(os.path.dirname(os.path.dirname(rootBaseDir.rstrip('/'))), 'var')
+    return f"""\
+    location /lcnt/ {{
+        try_files $uri $uri/ @lcntVar;
+    }}
+
+    # the landed metadata is for the page generator, not for readers
+    location ~ ^/lcnt/.*/meta\\.pyl$ {{
+        return 404;
+    }}
+
+    location @lcntVar {{
+        root {varDir};
+        try_files $uri =404;
+    }}
 """
 
 ####+BEGIN: b:py3:cs:func/typing :funcName "atPortSite" :funcType "extTyped" :deco "track"

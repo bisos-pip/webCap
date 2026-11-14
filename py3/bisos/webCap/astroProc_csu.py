@@ -27,8 +27,9 @@
 
 ####+BEGIN: b:prog:file/particulars :authors ("./inserts/authors-mb.org")
 """ #+begin_org
-* *[[elisp:(org-cycle)][| Particulars |]]* :: Authors, version
-** This File: /bisos/git/bxRepos/bisos-pip/webCap/py3/bisos/webCap/astroProc_csu.py
+* *[[elisp:(org-cycle)][| Particulars |]]* :: This File, Authors, version
+** This File: /bxRepos/bisos-pip/webCap/py3/bisos/webCap/astroProc_csu.py
+** File True Name: /bisos/git/auth/bxRepos/bisos-pip/webCap/py3/bisos/webCap/astroProc_csu.py
 ** Authors: Mohsen BANAN, http://mohsen.banan.1.byname.net/contact
 #+end_org """
 ####+END:
@@ -37,9 +38,8 @@
 """ #+begin_org
 * *[[elisp:(org-cycle)][| Particulars-csInfo |]]*
 #+end_org """
-import typing
-csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['astroProc_csu'], }
-csInfo['version'] = '202403270908'
+if 'csInfo' not in globals(): import typing ; csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['loadAs'], }
+csInfo['version'] = '202611143354'
 csInfo['status']  = 'inUse'
 csInfo['panel'] = 'astroProc_csu-Panel.org'
 csInfo['groupingType'] = 'IcmGroupingType-pkged'
@@ -90,9 +90,9 @@ import collections
 
 ####+BEGIN: b:py3:cs:framework/imports :basedOn "classification"
 """ #+begin_org
-** Imports Based On Classification=cs-u
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] *Imports* =Based on Classification=cs-u=
 #+end_org """
-from bisos import b
+from bisos import b  # noqa: E402
 from bisos.b import cs
 from bisos.b import b_io
 from bisos.common import csParam
@@ -152,6 +152,7 @@ def commonParamsSpecify(
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /siteBase/  deco=default  [[elisp:(org-cycle)][| ]]
 #+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
 def siteBase(
 ####+END:
 ) -> pathlib.Path:
@@ -172,6 +173,7 @@ else the current directory (when run without a plant).
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /siteDirs/  deco=default  [[elisp:(org-cycle)][| ]]
 #+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
 def siteDirs(
 ####+END:
         base: pathlib.Path | None = None,
@@ -204,6 +206,7 @@ def siteDirs(
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /contentBuild_/  deco=default  [[elisp:(org-cycle)][| ]]
 #+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
 def contentBuild_(
 ####+END:
         base: pathlib.Path | None = None,
@@ -238,6 +241,7 @@ the first failing script stops it.
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /siteBuild_/  deco=default  [[elisp:(org-cycle)][| ]]
 #+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
 def siteBuild_(
 ####+END:
         base: pathlib.Path | None = None,
@@ -262,6 +266,7 @@ def siteBuild_(
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /siteVerify_/  deco=default  [[elisp:(org-cycle)][| ]]
 #+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
 def siteVerify_(
 ####+END:
         fqdn: str,
@@ -497,7 +502,7 @@ class siteBuild(cs.Cmnd):
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "siteVerify" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 9999 :pyInv ""
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<siteVerify>>  =verify= argsMin=0 argsMax=9999 ro=cli   [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<siteVerify>>  =verify= argsMax=9999 ro=cli   [[elisp:(org-cycle)][| ]]
 #+end_org """
 class siteVerify(cs.Cmnd):
     cmndParamsMandatory = [ ]

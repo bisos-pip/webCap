@@ -96,6 +96,12 @@ skill describe it (2026-10-18).
 | =nodeEnv=         | loads the user's nvm (=NVM_DIR=, else =$XDG_CONFIG_HOME/nvm=, else =~/.nvm=) |
 |                   | before node, npm and npx, which builds run in non-interactive shells         |
 
+*LCNT documents on a site (optional).* =astroSite.cs -i libraryGenerate <fqdn>= (module
+=astroLcntLibrary_csu=) turns the documents that the lcnt =localWeb= export landed in a site's
+=var/lcnt/= into content-tree nodes: a Library tab and an access page per release. =webVd_nginxSites=
+supplies the =/lcnt/= locations of the site's vhost (=lcntVarLocations()=). The landing layout, the
+=meta.pyl= contract and what a site needs are in =/bisos/asc/web/astro/lcntLibrary/README.org=.
+
 * BISOS Web Apps
 
 ** csPlayer

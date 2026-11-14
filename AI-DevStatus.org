@@ -61,6 +61,16 @@ This file is maintained by Claude. Updates are typically triggered by the
     csPlayerUi.here, airflow.here, an unknown name; browse opened one tab. =setup.py= scripts list not
     regenerated (=pypiProc.sh=), so the =.cs= is not on PATH from the venv yet.
 
+  *Astro sites: the LCNT Library (2026-11-14; written after the notes above).* =py3/bin/astroSite.cs= over
+  =astroSite_csu.py= (=siteBase=: an FQDN to the site's base directory, from nginx) and =astroLcntLibrary_csu.py=
+  (=libraryGenerate=: from the documents the lcnt =localWeb= export landed in =<siteBase>/var/lcnt/=, it writes content-tree
+  nodes: the Library tab's page and an access page per release; standard library only; built aside, renamed in).
+  =webVd_nginxSites.lcntVarLocations()= adds the =/lcnt/= locations to a site's vhost (=meta.pyl= is never served);
+  =bisos.pals='s =pals-wvd.spcs= uses it. The site needs the page parameter =layoutBare=, a =library= folder node and
+  =.gitignore= lines (the starter has them). Works on =astroStarter.here= with three example documents; the contract is in
+  =/bisos/asc/web/astro/lcntLibrary/README.org=. Untested: other astro sites' vhosts (not regenerated); no unit tests.
+  The new =_csu.py= files need the =file/dblockControls= dblock for =bx-dblock= to expand them correctly.
+
 * Architecture
 
   This package (=bisos.webCap=) manages NGINX virtual-host entries using the same
