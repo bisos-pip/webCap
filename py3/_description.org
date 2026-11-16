@@ -17,6 +17,7 @@ bisos.webCap is a python package that uses the  [[https://github.com/bisos-pip/p
   - [[#nginx][NGINX]]
   - [[#python-back-end][Python Back-End]]
   - [[#react-front-end][React Front End]]
+  - [[#static-sites-----astro-and-the-content-tree][Static Sites --- Astro and the Content Tree]]
 - [[#bisos-web-apps][BISOS Web Apps]]
   - [[#csplayer][csPlayer]]
   - [[#byname-sites][ByName Sites]]
@@ -40,6 +41,19 @@ bisos.webCap is a python package that uses the  [[https://github.com/bisos-pip/p
 | nginx           | BISOS Module Name | Comment |
 | virtual domains |                   |         |
 
+- =nginx-cbs.pcs=, =nginx-sbom.pcs=, =nginx-sysd.pcs= --- nginx as a capability. =nginx-sysd.pcs= runs
+  =nginx-noIpv6.sh= before it restarts nginx: on a host without IPv6 it comments out =listen ... [::]=
+  lines (Debian's default site has one), which otherwise make =nginx -t= fail.
+- =webSitesEnabled.cs= --- the sites this host's nginx serves, from =nginx -T= (via =nginxSites.py=):
+
+| Cmnd               | What it does                                                               |
+|--------------------+----------------------------------------------------------------------------|
+| =sitesList=        | the FQDNs (not =_=, wildcards or regex names)                              |
+| =verify=           | read-only: URL, HTTP status, base directory or proxy target, file          |
+| =browse [fqdn ..]= | open them (default all) as browser tabs                                    |
+| =report=           | =verify=, then =browse=                                                    |
+| =baseFind fqdn=    | the directory the FQDN is served from; none for a proxied site             |
+
 ** Python Back-End
 
 | django   | djangoAdmin.cs | Comment   |
@@ -53,6 +67,31 @@ bisos.webCap is a python package that uses the  [[https://github.com/bisos-pip/p
 | gatsby                                            |                 |         |
 | reveal.js                                         |                 |         |
 | https://github.com/bouzidanas/react-reveal-slides |                 |         |
+
+** Static Sites --- Astro and the Content Tree
+
+A BISOS static site keeps its capability, content and site apart under one directory: =astroProc.spcs=
+(planted on =astroProc-seed.cs=), =cbm/= (CBS, assemble, vhost, dns entry), =content/tree/= (the pages,
+in the model of the ByStar Plone 3 ContentTree), =content/bin/= (content scripts) and =site/= (Astro).
+Start from =bisos-web/astro-starter-bystar=; the =astro-site= activity and the =astro-site-authorship=
+skill describe it (2026-10-18).
+
+| Module            | What it is                                                                   |
+|-------------------+------------------------------------------------------------------------------|
+| =contentTree_csu= | engine-neutral: read, validate, =pageLcnt= bodies (HeVeA, RTL), =files=      |
+|                   | nodes, Plone 3 ContentTree import; Cmnds =contentTree*=                      |
+| =astroProc_csu=   | Astro: =contentBuild=, =siteBuild=, =siteVerify=, =siteInfo=, from the       |
+|                   | planted file's directory                                                     |
+| =astroProc_seed*= | the seed hook and what a planted =astroProc.spcs= declares (fqdn, dev port)  |
+| =reactProc_*=     | React/Gatsby; =setup(siteDir=...)= (2026-10-18) for a site in a subdirectory |
+| =nodeEnv=         | loads the user's nvm (=NVM_DIR=, else =$XDG_CONFIG_HOME/nvm=, else =~/.nvm=) |
+|                   | before node, npm and npx, which builds run in non-interactive shells         |
+
+*LCNT documents on a site (optional).* =astroSite.cs -i libraryGenerate <fqdn>= (module
+=astroLcntLibrary_csu=) turns the documents that the lcnt =localWeb= export landed in a site's
+=var/lcnt/= into content-tree nodes: a Library tab and an access page per release. =webVd_nginxSites=
+supplies the =/lcnt/= locations of the site's vhost (=lcntVarLocations()=). The landing layout, the
+=meta.pyl= contract and what a site needs are in =/bisos/asc/web/astro/lcntLibrary/README.org=.
 
 * BISOS Web Apps
 

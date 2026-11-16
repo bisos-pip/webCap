@@ -43,9 +43,9 @@ def longDescription():
 # b:py3:pypi:setup/version Arguments  :forSys t :forPyPi t :constant "666"
 ####+BEGIN: b:py3:pypi:setup/version :comment "Auto Detected"
 
-# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.17 -- forLocalVersion=0.15 -- constant=NA
+# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.17 -- forLocalVersion=0.1 -- constant=NA
 def pkgVersion():
-        return '0.15'
+        return '0.1'
 
 ####+END:
 
@@ -91,6 +91,7 @@ scripts = [
 'bin/reactProc-seed.cs',
 'bin/reactProc.spcs',
 'bin/webCap-sboms.pcs',
+'bin/webSitesEnabled.cs',
 ]
 ####+END:
 

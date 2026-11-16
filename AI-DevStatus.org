@@ -71,6 +71,13 @@ This file is maintained by Claude. Updates are typically triggered by the
   =/bisos/asc/web/astro/lcntLibrary/README.org=. Untested: other astro sites' vhosts (not regenerated); no unit tests.
   The new =_csu.py= files need the =file/dblockControls= dblock for =bx-dblock= to expand them correctly.
 
+  *The LCNT Library from =lcntSpecs/= (2026-11-16; WorkPlan 4.2).* A site's Library is now rebuilt from its own
+  repository: =<siteBase>/lcntSpecs/*.pyl= (one per release, in git, written by the lcnt export) point at releases
+  by their canonical =/de/sys/lcnt= path, else by BXO (=/bisos/git/bxRepos/<org>/<repo>= or =/bxo/<id>=).
+  =astroLcntLibrary_csu.build()= (=land_all= then =generate=) rebuilds =var/lcnt/= whole from them and is run by
+  =astroProc_csu.contentBuild_= when =lcntSpecs/= exists; =libraryGenerate= does the same. Untested: a BPO, and
+  another host.
+
 * Architecture
 
   This package (=bisos.webCap=) manages NGINX virtual-host entries using the same

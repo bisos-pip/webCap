@@ -30,14 +30,18 @@ csInfo['cmndParts'] = 'IcmCmndParts[common] IcmCmndParts[param]'
 ####+END:
 
 """ #+begin_org
-* [[elisp:(org-cycle)][| ~Description~ |]] :: Pages for the LCNT documents landed in an astro site's var/lcnt
-The lcnt =localWeb= export (bisos.lcnt) lands a release in =<siteBase>/var/lcnt/<class>/<number>/<release>/=, with
-=meta.pyl=, one Python literal (read here with ast.literal_eval, never eval). =libraryGenerate= turns what is landed into
+* [[elisp:(org-cycle)][| ~Description~ |]] :: Pages for the LCNT documents a site declares in its lcntSpecs/
+A site declares the LCNT releases it publishes in =<siteBase>/lcntSpecs/*.pyl=, kept in the site's git: one Python
+literal per release (read with ast.literal_eval, never eval), written by the lcnt =localWeb= export (bisos.lcnt). Each
+points at the release: its canonical path (=/de/sys/lcnt/...=), else its BXO and the path in it. =landAll= rebuilds
+=<siteBase>/var/lcnt/= wholly from those specs (var/ is a cache, outside git): =<class>/<number>/<release>/= with the
+release's files and =meta.pyl=. =libraryGenerate= turns what is landed into
 *content-tree nodes*, which the site renders like any other page (no JavaScript of its own, no per-site wrapper pages):
 =content/tree/lcnt/<class>/<number>/<release>/accessPage/=, the latest-release alias =.../<number>/accessPage/=, and
 =content/tree/library/index_html/=. They are generated whole on every run (built aside, renamed in), and a site keeps
 them out of git. The access pages' look is =/bisos/asc/web/astro/lcntLibrary/lcntLibrary.css=, copied into each page.
 The site needs the page parameter =layoutBare= (no footer, no tree heading) in its layout. Standard library only.
+=build= (landAll, then generate) is what the site's =contentBuild= runs when the site has =lcntSpecs/=.
 ** Status: In use with BISOS
 ** /[[elisp:(org-cycle)][| Planned Improvements |]]/ :
 *** TODO Embed the document only when it is a plain HeVeA article; a presentation shows its formats only.
@@ -56,15 +60,24 @@ import collections
 ####+END:
 
 import ast
+import datetime
 import html
 import os
 import pathlib
+import pprint
 import re
 import shutil
+import subprocess
 
 from bisos.webCap import astroSite_csu
 
 styleSheetPath = pathlib.Path("/bisos/asc/web/astro/lcntLibrary/lcntLibrary.css")
+
+specsDirName = "lcntSpecs"
+specVersion = 1
+# Where an activated BXO is on any BISOS host: a BRO by its <org>/<repo>, a BPO by its id.
+bxoRoots = {"bro": pathlib.Path("/bisos/git/bxRepos"), "bpo": pathlib.Path("/bxo")}
+htmlSuffixes = frozenset(['.html', '.htm', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg'])
 
 ####+BEGIN: b:py3:cs:orgItem/section :title "Common Parameters Specification" :comment "based on cs.param.CmndParamDict -- As expected from CSU-s"
 """ #+begin_org
@@ -366,6 +379,175 @@ def generate(base):
     return count, sum(len(n) for n in found.values())
 
 
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "Landing" :anchor ""  :extraInfo "var/lcnt from lcntSpecs/"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*     [[elisp:(outline-show-subtree+toggle)][| _Landing_: |]]  var/lcnt from lcntSpecs/  [[elisp:(org-shifttab)][<)]] E|
+#+end_org """
+####+END:
+
+def read_spec(path):
+    """(spec, "") or (None, reason): one lcntSpecs/*.pyl, a literal dictionary of a known specVersion."""
+    spec = read_meta(path)
+    if spec is None:
+        return None, f"{path.name}: not a Python literal dictionary"
+    if spec.get("specVersion") != specVersion:
+        return None, f"{path.name}: specVersion {spec.get('specVersion')!r}, expected {specVersion}"
+    for key in ("lcntClass", "lcntNu", "relTag", "release"):
+        if not spec.get(key):
+            return None, f"{path.name}: {key} is missing"
+    for key in ("lcntClass", "lcntNu", "relTag"):
+        if "/" in str(spec[key]) or str(spec[key]).startswith("."):
+            return None, f"{path.name}: {key} {spec[key]!r} cannot be a directory name"
+    return spec, ""
+
+
+def release_dir_of(spec):
+    """(directory, "") or (None, reason): the release on this host, by its canonical path, else by its BXO.
+
+    The BXO and the path in it are the authority; the canonical path (/de/sys/lcnt/...) is the quick way in.
+    """
+    canonical = spec.get("releaseDir")
+    if canonical and pathlib.Path(canonical).is_dir():
+        return pathlib.Path(canonical), ""
+    kind, bxo, inBxo = spec.get("bxoKind"), spec.get("bxo"), spec.get("bxoPath")
+    if kind in bxoRoots and bxo and inBxo:
+        repo = bxoRoots[kind] / bxo
+        if (repo / inBxo).is_dir():
+            return repo / inBxo, ""
+        if repo.is_dir():
+            return None, f"the {kind.upper()} {bxo} is at {repo} but has no {inBxo} (pull it?)"
+        return None, f"the {kind.upper()} {bxo} is not activated on this host (expected at {repo})"
+    return None, f"no {canonical} and no BXO to find it in"
+
+
+def commit_of(directory):
+    """The last commit that touched directory, or None (not in git, or never committed)."""
+    try:
+        out = subprocess.run(["git", "-C", str(directory), "log", "-1", "--format=%H", "--", "."],
+                             capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return out.stdout.strip() or None
+
+
+def meta_text(meta):
+    """meta.pyl's text: one Python literal, formatted by black when it is importable."""
+    text = pprint.pformat(dict(sorted(meta.items()))) + "\n"
+    try:
+        import black
+        return black.format_str(text, mode=black.Mode())
+    except Exception:                                      # not importable, or black refused: still a valid literal
+        return text
+
+
+def land_release(spec, specName, releaseDir, varLcnt):
+    """Copy what spec names from releaseDir into varLcnt/<class>/<nu>/<rel>/ with its meta.pyl; returns the problems."""
+    rel = spec["release"]
+    final = varLcnt / spec["lcntClass"] / spec["lcntNu"] / spec["relTag"]
+    final.mkdir(parents=True)
+    problems, files, formats = [], [], []
+    for pdf in rel.get("pdfs") or []:
+        source = releaseDir / pdf["name"]
+        if not source.is_file():
+            problems.append(f"{specName}: {source} is missing")
+            continue
+        shutil.copyfile(source, final / pdf["name"])
+        files.append(pdf["name"])
+        formats.append({"kind": "pdf", "path": pdf["name"], "bytes": source.stat().st_size, "build": pdf.get("build")})
+    htmlEntry = None
+    if rel.get("html"):
+        source = releaseDir / rel["html"]
+        if not source.is_dir():
+            problems.append(f"{specName}: {source}/ is missing")
+        else:
+            out = final / "html"
+            out.mkdir()
+            for each in sorted(source.iterdir()):
+                if each.is_symlink() or not each.is_file() or each.suffix not in htmlSuffixes:
+                    continue
+                shutil.copyfile(each, out / each.name)
+                files.append(f"html/{each.name}")
+            nbytes = sum(f.stat().st_size for f in out.iterdir())
+            entry = rel.get("htmlEntry")
+            if entry and (out / entry).is_file():
+                if entry != "index.html":
+                    shutil.copyfile(out / entry, out / "index.html")   # a copy: not counted in the size
+                    files.append("html/index.html")
+                htmlEntry = "html/index.html"
+                formats.append({"kind": "html", "path": htmlEntry, "bytes": nbytes})
+    for bib in rel.get("bibs") or []:
+        source = releaseDir / bib
+        if source.is_file():
+            shutil.copyfile(source, final / bib)
+            files.append(bib)
+            formats.append({"kind": "bib", "path": bib, "bytes": source.stat().st_size})
+    meta = dict(spec.get("meta") or {})
+    meta.update(lcntClass=spec["lcntClass"], lcntNu=spec["lcntNu"], relTag=spec["relTag"], html=htmlEntry,
+                pdfs=[p["name"] for p in rel.get("pdfs") or [] if (final / p["name"]).is_file()],
+                formats=formats, files=sorted(files), lcntSpec=specName,
+                landedAt=datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"))
+    if spec.get("docNumber"):
+        meta["docNumber"] = spec["docNumber"]
+    (final / "meta.pyl").write_text(meta_text(meta))
+    for root, dirs, names in os.walk(final):
+        os.chmod(root, 0o755)
+        for name in names:
+            os.chmod(os.path.join(root, name), 0o644)
+    return problems
+
+
+def land_all(base):
+    """Rebuild base/var/lcnt from base/lcntSpecs/*.pyl, whole; returns (landed, problems).
+
+    A release that cannot be found is a problem, and the others are still landed. A release whose last commit is
+    not the one recorded at export is landed, with a note (it was changed, or rebuilt, since).
+    """
+    specs = base / specsDirName
+    var = base / "var"
+    var.mkdir(exist_ok=True)
+    new = var / ".lcnt.new"
+    if new.exists():
+        shutil.rmtree(new)
+    new.mkdir()
+    landed, problems, seen = [], [], set()
+    for path in sorted(specs.glob("*.pyl")) if specs.is_dir() else []:
+        spec, reason = read_spec(path)
+        if spec is None:
+            problems.append(reason)
+            continue
+        key = (spec["lcntClass"], spec["lcntNu"], spec["relTag"])
+        if key in seen:
+            problems.append(f"{path.name}: {'/'.join(key)} is declared twice")
+            continue
+        seen.add(key)
+        releaseDir, reason = release_dir_of(spec)
+        if releaseDir is None:
+            problems.append(f"{path.name}: {reason}")
+            continue
+        commit = commit_of(releaseDir)
+        if spec.get("bxoCommit") and commit and commit != spec["bxoCommit"]:
+            print(f"note: {path.name}: {releaseDir} was committed again since the export "
+                  f"({spec['bxoCommit'][:10]} then, {commit[:10]} now)")
+        try:
+            problems += land_release(spec, path.name, releaseDir, new)
+        except OSError as err:
+            problems.append(f"{path.name}: cannot land: {err}")
+            continue
+        landed.append("/".join(key))
+    replace_dir(new, var / "lcnt")
+    return landed, problems
+
+
+def build(base):
+    """The site's Library from its lcntSpecs/: land_all, then generate. Returns the problems."""
+    landed, problems = land_all(base)
+    for each in landed:
+        print(f"landed: var/lcnt/{each}")
+    releases, documents = generate(base)
+    print(f"library: {documents} documents, {releases} releases")
+    return problems
+
+
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "Direct Command Services" :anchor ""  :extraInfo "Examples and CSs"
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*     [[elisp:(outline-show-subtree+toggle)][| _Direct Command Services_: |]]  Examples and CSs  [[elisp:(org-shifttab)][<)]] E|
@@ -398,7 +580,7 @@ class examples_csu(cs.Cmnd):
         #+end_org """)
 
         cmnd = cs.examples.cmndEnter
-        cs.examples.menuChapter('=libraryGenerate= -- the Library and the access pages, from what lcnt landed in var/lcnt')
+        cs.examples.menuChapter('=libraryGenerate= -- var/lcnt from lcntSpecs/, then the Library and the access pages')
         cmnd('libraryGenerate', args="astroStarter.here", comment=" # by FQDN (found through nginx)")
         cmnd('libraryGenerate', args="/bisos/git/bxRepos/bisos-web/astro-starter-bystar", comment=" # or by the site's base directory")
         return(cmndOutcome)
@@ -427,7 +609,7 @@ class libraryGenerate(cs.Cmnd):
         cmndArgsSpecDict = self.cmndArgsSpec()
 ####+END:
         self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  For each site (an FQDN, or a base directory when it holds a slash), write the Library page and the LCNT access pages as content-tree nodes from the site's var/lcnt, and print "<base>: N documents, M releases".
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  For each site (an FQDN, or a base directory when it holds a slash), rebuild its var/lcnt from its lcntSpecs/, then write the Library page and the LCNT access pages as content-tree nodes, and print what was landed and "library: N documents, M releases". The site's contentBuild does the same.
         #+end_org """)
 
         sites = self.cmndArgsGet("0&-1", cmndArgsSpecDict, argsList)
@@ -448,12 +630,14 @@ class libraryGenerate(cs.Cmnd):
                 allDone = False
                 continue
             try:
-                releases, documents = generate(base)
+                problems = build(base)
             except OSError as err:
                 b_io.eh.problem_usageError(f"{base}: {err}")
                 allDone = False
                 continue
-            print(f"{base}: {documents} documents, {releases} releases")
+            for problem in problems:
+                b_io.eh.problem_usageError(f"{base}: {problem}")
+                allDone = False
         if not allDone:
             return failed(cmndOutcome)
         return cmndOutcome.set(opError=b.OpError.Success, opResults=None)

@@ -51,10 +51,11 @@ csInfo['cmndParts'] = 'IcmCmndParts[common] IcmCmndParts[param]'
 A BISOS static site keeps its capability, content and site apart, under one directory (=<siteBase>=):
 | =astroProc.spcs= | planted on astroProc-seed.cs; declares the fqdn and dev port         |
 | =cbm/=           | the capability: CBS, assemble (siteBuild, hereDns, webVirtDom), vhost, dns |
+| =lcntSpecs/=     | optional: the LCNT releases the site publishes (its Library), one =.pyl= each |
 | =content/tree/=  | the content tree (contentTree_csu), engine-neutral                  |
 | =content/bin/=   | site-specific content scripts; each writes into =content/data/=     |
 | =site/=          | the Astro site; built into =site/dist/=, which nginx serves         |
-This module is the Astro-specific processing: contentBuild (pageLcnt bodies, files nodes, then every
+This module is the Astro-specific processing: contentBuild (the LCNT Library, pageLcnt bodies, files nodes, then every
 executable in content/bin/), siteBuild (contentBuild, then npm ci and astro build in site/), and
 siteVerify (the site's pages over HTTP). It works from siteBase, never from the current directory.
 Node and npm come from the reactPlus capability; Astro itself is pinned by site/package-lock.json.
@@ -107,6 +108,7 @@ import urllib.error
 import urllib.request
 
 from bisos.csSeed import seedsLib
+from bisos.webCap import astroLcntLibrary_csu
 from bisos.webCap import astroProc_seedInfo
 from bisos.webCap import contentTree_csu
 from bisos.webCap import nodeEnv
@@ -185,6 +187,7 @@ def siteDirs(
     return {
         "base": base,
         "cbm": base / "cbm",
+        "lcntSpecs": base / "lcntSpecs",
         "content": base / "content",
         "tree": base / "content" / "tree",
         "bin": base / "content" / "bin",
@@ -212,12 +215,15 @@ def contentBuild_(
         base: pathlib.Path | None = None,
 ) -> list[str]:
     """ #+begin_org
-** [[elisp:(org-cycle)][| *DocStr | ] Build the content: the tree's pageLcnt bodies (HeVeA) and files nodes (into
-site/public/), then every executable in content/bin/, in name order, from base. Returns the problems;
-the first failing script stops it.
+** [[elisp:(org-cycle)][| *DocStr | ] Build the content: the LCNT Library when the site has lcntSpecs/ (var/lcnt
+landed from the specs, then the Library and access pages), the tree's pageLcnt bodies (HeVeA) and files
+nodes (into site/public/), then every executable in content/bin/, in name order, from base. Returns the
+problems; the first failing script stops it.
     #+end_org """
     d = siteDirs(base)
     problems = []
+    if d["lcntSpecs"].is_dir():
+        problems += astroLcntLibrary_csu.build(d["base"])
     if d["tree"].is_dir():
         for warning in contentTree_csu.validate(d["tree"]):
             print(f"content/tree: {warning}")

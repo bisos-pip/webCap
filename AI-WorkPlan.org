@@ -261,6 +261,41 @@ Built and run 2026-11-14 on three example documents; not marked DONE; awaiting t
 - Documented in =README.org= (Static Sites). Works on the starter site with three examples.
 - Not done: other sites' vhosts are not regenerated; no unit tests.
 
+** TODO [#A] <<4.2>> The Library from the site's own =lcntSpecs/=, not from a landing pushed into =var/= :aiAndMe:
+The design flaw (user, 2026-11-16): a site must be rebuildable from scratch on demand and be possession
+assertable (PALS), so also on another host. The export landed releases in the site's =var/lcnt/=, outside
+the site's git, so a fresh host lost them; and the rebuild was not the site's generic
+=astroProc.spcs -i contentBuild=. Decided with the user:
+- The export writes a pointer per release, =<siteBase>/lcntSpecs/<pubcategory>-<nu>-<rel>.pyl=, beside
+  =content/=, owned by and committed in the site: canonical path (=/de/sys/lcnt/...=), LCNT-INFO path, the
+  BXO (BRO or BPO) and the path in it, the release's last commit (a mismatch is noted, not enforced), and
+  the metadata taken from LCNT-INFO at export, so the site needs no LCNT-INFO to build.
+- =contentBuild= lands the releases into =var/= (a cache, artifacts not in the site) and generates the pages.
+- The export lands through the site: it writes the spec and runs the site's =siteBuild=.
+- Activation of a missing BXO (=bpoActivate.sh=) is assumed done, and deferred.
+----- AI Results: ------
+2026-11-16 (Claude): done, uncommitted, in four repos.
+- bisos.webCap =astroLcntLibrary_csu.py=: =read_spec= (literal only, =specVersion= 1), =release_dir_of=
+  (canonical path, else =/bisos/git/bxRepos/<bxo>= or =/bxo/<bxo>=, else a problem naming the BXO),
+  =commit_of=, =land_release= (moved from bisos.lcnt's =landOne=), =land_all= (=var/lcnt= rebuilt whole) and
+  =build= (=land_all=, then =generate=). =libraryGenerate= now runs =build=.
+  =astroProc_csu.contentBuild_= runs =build= first when =lcntSpecs/= exists; =siteDirs= has =lcntSpecs=.
+- bisos.lcnt =exportLocalWeb_csu.py=: =specOf= / =canonicalOf= / =bxoOf= / =specName= / =specWrite= replace
+  =landOne=; =generateFor= now defaults to =<base>/astroProc.spcs -i siteBuild= (=siteGenerator= still overrides).
+- The contract =/bisos/asc/web/astro/lcntLibrary/README.org= (repo =bisos/asc=) has the spec and landing contracts.
+  READMEs of webCap, lcnt and the starter updated.
+- Tested on astroStarter.here: re-exported 580003, which wrote =lcntSpecs/plpc-580003-0.1.pyl= and rebuilt the
+  site; =/library/=, both access pages, the pdf and the html answer 200, =meta.pyl= 404. Then =var/lcnt=, the
+  =lcnt= nodes and the Library page were moved aside and =astroProc.spcs -i contentBuild= alone rebuilt them
+  (=meta.pyl= the same but for =landedAt=; the nodes identical). In a scratch site: BXO fallback (canonical
+  path missing) landed; a BRO not activated, a wrong =specVersion= and code in a =.pyl= were refused with
+  their reasons; a different =bxoCommit= gave the note and landed.
+- The export noted that 580003's =Release/0.1= in =bro_lcntBases-rawBisos= has uncommitted changes: another host
+  would get the older release until it is committed and pushed.
+- 580004 and 580002 re-exported the same way: =lcntSpecs/= holds three specs, the Library lists all three, their
+  access pages answer 200.
+- Not tested: a BPO, another host.
+
 ** -
 
 
