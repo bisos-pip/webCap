@@ -57,7 +57,7 @@ parameter rules, validation, the bodies of =pageLcnt= nodes (LaTeX through HeVeA
 A node is a directory; its parameters are one file each, named as in the Plone 3 ContentTree:
 | =objectType=      | folder, page, pageLcnt, files, custom, app (auxNode, auxLeaf, rawFiles: the old slider) |
 | (app)             | the tree gives the tab, title and place; the site's fixed page renders it (an island) |
-| (link)            | a tab that leads out to =linkUrl= (e.g. another .here site)                  |
+| (link)            | a tab that leads out to =linkUrl= (e.g. another .internal site)                  |
 | =folderTitle=     | a folder's label in the navigation                                 |
 | =pageTitle=       | a page's heading and title; =pageDescription= its summary          |
 | =pubState=        | publish: built; anything else: left out                            |

@@ -105,7 +105,7 @@ class AstroProcSeedInfo(object):
 
     # Specific SeedInfo
     siteBase: str | None = None      # default: the planted file's directory
-    fqdn: str | None = None          # e.g. platform.here
+    fqdn: str | None = None          # e.g. platform.internal
     devPortNu: int | None = None     # astro dev / preview; e.g. the banna <name>_dev port
 
     def __post_init__(self):

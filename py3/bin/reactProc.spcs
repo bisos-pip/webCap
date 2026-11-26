@@ -13,7 +13,7 @@ from bisos.webCap import reactProc_seed as reactProc_seed # noqa: F401  # type: 
 from bisos.webCap import reactProc_seedInfo
 
 reactProc_seedInfo.setup(
-    webVirtualDomain="csWebPlayer.here",
+    webVirtualDomain="csWebPlayer.internal",
     examplesFuncsList=[lambda: examples_spcs(),],  # lambda is for forward reference
 )
 

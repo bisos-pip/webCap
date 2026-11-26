@@ -581,7 +581,7 @@ class examples_csu(cs.Cmnd):
 
         cmnd = cs.examples.cmndEnter
         cs.examples.menuChapter('=libraryGenerate= -- var/lcnt from lcntSpecs/, then the Library and the access pages')
-        cmnd('libraryGenerate', args="astroStarter.here", comment=" # by FQDN (found through nginx)")
+        cmnd('libraryGenerate', args="astroStarter.internal", comment=" # by FQDN (found through nginx)")
         cmnd('libraryGenerate', args="/bisos/git/bxRepos/bisos-web/astro-starter-bystar", comment=" # or by the site's base directory")
         return(cmndOutcome)
 

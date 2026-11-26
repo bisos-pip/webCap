@@ -154,8 +154,8 @@ class examples_csu(cs.Cmnd):
 
         cmnd = cs.examples.cmndEnter
         cs.examples.menuChapter('=siteBase= -- the base directory of an astro site, from nginx')
-        cmnd('siteBase', args="astroStarter.here", comment=" # prints: <fqdn> <base>")
-        cmnd('siteBase', args="astroStarter.here platform.here", comment=" # several; exit 1 if any fails")
+        cmnd('siteBase', args="astroStarter.internal", comment=" # prints: <fqdn> <base>")
+        cmnd('siteBase', args="astroStarter.internal platform.internal", comment=" # several; exit 1 if any fails")
         return(cmndOutcome)
 
 
@@ -218,7 +218,7 @@ class siteBase(cs.Cmnd):
             argName="fqdns",
             argDefault='',
             argChoices=[],
-            argDescription="One or more FQDNs of astro sites, e.g. astroStarter.here"
+            argDescription="One or more FQDNs of astro sites, e.g. astroStarter.internal"
         )
 
         return cmndArgsSpecDict

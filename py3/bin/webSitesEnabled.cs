@@ -190,12 +190,12 @@ class examples(cs.Cmnd):
 
         cs.examples.menuChapter('=Browser Tabs=')
         cmnd('browse', comment=" # open all as tabs")
-        cmnd('browse', args="platform.here csPlayerUi.here", comment=" # open these as tabs")
+        cmnd('browse', args="platform.internal csPlayerUi.internal", comment=" # open these as tabs")
         cmnd('report', comment=" # verify, then browse")
 
         cs.examples.menuChapter('=Base Directory of an FQDN=')
-        cmnd('baseFind', args="platform.here", comment=" # the directory platform.here is served from")
-        cmnd('baseFind', args="airflow.here", comment=" # a proxied site: no base directory")
+        cmnd('baseFind', args="platform.internal", comment=" # the directory platform.internal is served from")
+        cmnd('baseFind', args="airflow.internal", comment=" # a proxied site: no base directory")
 
         return(cmndOutcome)
 

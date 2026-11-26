@@ -13,7 +13,7 @@ from bisos.webCap import djangoProc_seed as djangoProc_seed # noqa: F401  # type
 from bisos.webCap import djangoProc_seedInfo
 
 djangoProc_seedInfo.setup(
-    webVirtualDomain="csWebPlayer.here",
+    webVirtualDomain="csWebPlayer.internal",
     examplesFuncsList=[lambda: examples_spcs(),],  # lambda is for forward reference
 )
 
