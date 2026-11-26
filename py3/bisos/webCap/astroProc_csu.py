@@ -532,13 +532,20 @@ class siteVerify(cs.Cmnd):
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  GET the given paths of http://<fqdn> (200 expected) and a missing one (404).
         #+end_org """)
 
+        # The last line, "<fqdn> verify: ok|fail ...", is what bisos.capability's cbm_verify reads:
+        # it does not trust exit codes yet (bisos-pip/b Stage 4).
         fqdn = astroProc_seedInfo.astroProcSeedInfo.fqdn
         if not fqdn:
             print("no fqdn declared (astroProc_seedInfo.setup(fqdn=...))")
+            print("site verify: fail no fqdn declared")
             return failed(cmndOutcome)
         paths = self.cmndArgsGet("0&9999", cmndArgsSpecDict, argsList) or ["/"]
         problems = siteVerify_(fqdn, list(paths))
-        return failed(cmndOutcome) if problems else cmndOutcome.set(opError=b.OpError.Success, opResults=None)
+        if problems:
+            print(f"{fqdn} verify: fail {'; '.join(problems)}")
+            return failed(cmndOutcome)
+        print(f"{fqdn} verify: ok")
+        return cmndOutcome.set(opError=b.OpError.Success, opResults=None)
 
 ####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
     """ #+begin_org

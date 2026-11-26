@@ -23,6 +23,10 @@ This file is maintained by Claude. Updates are typically triggered by the
 =/bx-update-status= slash command, after major interactions, or before a release.
 
 * Current State
+- 2026-11-26 (from a bisos-pip/b session; uncommitted, not released): =astroProc.spcs -i siteVerify=
+  ends with =<fqdn> verify: ok|fail ...=, read by bisos.capability's =cbm_verify=
+  (bisos-pip/capability AI-WorkPlan.org Stage 5); the Astro sites' CBM leaves use it as their
+  =verifySpec=. Run here: ok on platform, astroStarter, csPlayerUi.
 - 2026-11-26 (from a bisos-pip/b session): every =<name>.here= in this repo is now =<name>.internal=
   (=.here= is an https-only gTLD in Chrome; bisos-pip/banna AI-WorkPlan.org Stage 4, banna's
   =tcpPorts.hereFqdn=). Text renamed, not tested here; AI-WorkPlan.org keeps =.here= as history.
