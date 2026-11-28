@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+# What an Astro site's CBS needs to build its site, so that the site's CBM is self-contained:
+# Node (per user, through nvm; Astro needs node >= 22.12) and HeVeA for the content tree's LaTeX
+# pages (contentTree_csu.py). Astro itself comes from the site's site/package-lock.json.
+
+from bisos.sbom import pkgsSeed  # pkgsSeed.plantWithWhich("seedSbom.cs")
+ap = pkgsSeed.aptPkg
+sbom = pkgsSeed.sbomSpec
+
+sbomsList = [
+    sbom("/bisos/core/bsip/bin/nvm-sbom.pcs"),   # nvm and the LTS Node, for the invoking user
+]
+
+aptPkgsList = [
+    ap("hevea"),    # LaTeX to HTML, for pageLcnt nodes
+]
+
+pkgsSeed.setup(
+    sbomsList=sbomsList,
+    aptPkgsList=aptPkgsList,
+)
